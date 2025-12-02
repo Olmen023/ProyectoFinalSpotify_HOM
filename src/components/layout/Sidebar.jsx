@@ -1,14 +1,39 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Music, Home, Compass, Heart, PlusCircle, Library } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSpotify } from '@/hooks/useSpotify';
+import CreatePlaylistModal from '@/components/ui/CreatePlaylistModal';
 
 /**
  * Barra lateral de navegación con logo, menú y playlists
  */
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { getUserProfile, createPlaylist, loading } = useSpotify();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const profile = await getUserProfile();
+      setUser(profile);
+    };
+    loadUser();
+  }, [getUserProfile]);
+
+  const handleCreatePlaylist = async (name, description, isPublic) => {
+    if (!user) return;
+
+    const playlist = await createPlaylist(user.id, name, description, isPublic);
+    if (playlist) {
+      // Redirigir a la biblioteca o mostrar éxito
+      router.push('/dashboard/library');
+    }
+  };
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/dashboard' },
@@ -65,7 +90,10 @@ export default function Sidebar() {
         })}
 
         {/* Create Playlist */}
-        <button className="flex items-center gap-4 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl font-medium transition-all w-full">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-4 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl font-medium transition-all w-full"
+        >
           <PlusCircle size={22} />
           <span>Create Playlist</span>
         </button>
@@ -88,6 +116,14 @@ export default function Sidebar() {
           ))}
         </div>
       </div>
+
+      {/* Create Playlist Modal */}
+      <CreatePlaylistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreatePlaylist={handleCreatePlaylist}
+        loading={loading}
+      />
     </aside>
   );
 }

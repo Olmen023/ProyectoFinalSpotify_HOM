@@ -117,6 +117,120 @@ export function useSpotify() {
     }
   }, [spotifyFetch]);
 
+  const getUserTopArtists = useCallback(async (limit = 20, timeRange = 'medium_term') => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/me/top/artists?limit=${limit}&time_range=${timeRange}`);
+      return data.items;
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
+  const getUserPlaylists = useCallback(async (limit = 50) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/me/playlists?limit=${limit}`);
+      return data.items;
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
+  const getUserSavedAlbums = useCallback(async (limit = 20) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/me/albums?limit=${limit}`);
+      return data.items.map(item => item.album);
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
+  const getUserSavedTracks = useCallback(async (limit = 50) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/me/tracks?limit=${limit}`);
+      return data.items;
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
+  const createPlaylist = useCallback(async (userId, name, description = '', isPublic = true) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          public: isPublic
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to create playlist');
+      return await response.json();
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const addTracksToPlaylist = useCallback(async (playlistId, trackUris) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uris: trackUris
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to add tracks to playlist');
+      return await response.json();
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   /**
    * Genera una playlist basada en las preferencias del usuario
    * Usa artist top tracks y búsqueda por géneros
@@ -216,6 +330,12 @@ export function useSpotify() {
     getArtistTopTracks,
     getUserProfile,
     getUserTopTracks,
+    getUserTopArtists,
+    getUserPlaylists,
+    getUserSavedAlbums,
+    getUserSavedTracks,
+    createPlaylist,
+    addTracksToPlaylist,
     generatePlaylist
   };
 }

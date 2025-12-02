@@ -6,12 +6,22 @@ import { Play } from 'lucide-react';
  * Tarjeta de álbum/artista con efecto hover y botón play
  */
 export default function AlbumCard({
+  id,
+  name,
   image,
+  artist,
+  type,
+  // Props antiguas para compatibilidad
   title,
   subtitle,
   onClick,
   onPlayClick
 }) {
+  // Usar nuevas props con fallback a props antiguas
+  const displayTitle = name || title || 'Unknown';
+  const displaySubtitle = artist || subtitle || '';
+  const displayImage = image || '/placeholder-album.png';
+
   return (
     <div
       onClick={onClick}
@@ -19,8 +29,8 @@ export default function AlbumCard({
     >
       <div className="relative aspect-square rounded-md overflow-hidden mb-4 shadow-lg">
         <img
-          src={image || '/placeholder-album.png'}
-          alt={title}
+          src={displayImage}
+          alt={displayTitle}
           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
         />
         {/* Botón Play (aparece en hover) */}
@@ -34,8 +44,8 @@ export default function AlbumCard({
           <Play fill="white" size={20} className="text-white" />
         </div>
       </div>
-      <h3 className="font-bold text-white text-base truncate">{title}</h3>
-      <p className="text-sm text-gray-400 mt-1 truncate">{subtitle}</p>
+      <h3 className="font-bold text-white text-base truncate">{displayTitle}</h3>
+      <p className="text-sm text-gray-400 mt-1 truncate">{displaySubtitle}</p>
     </div>
   );
 }
