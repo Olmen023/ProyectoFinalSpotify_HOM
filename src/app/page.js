@@ -2,8 +2,12 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { isAuthenticated, getSpotifyAuthUrl } from '@/lib/auth';
+import { isAuthenticated } from '@/lib/auth';
+import LoginScreen from '@/components/LoginScreen';
 
+/**
+ * Página principal - Muestra login o redirige a dashboard
+ */
 export default function Home() {
   const router = useRouter();
 
@@ -14,15 +18,15 @@ export default function Home() {
     }
   }, [router]);
 
-  const handleLogin = () => {
-    window.location.href = getSpotifyAuthUrl();
-  };
+  // Si no está autenticado, mostrar pantalla de login
+  if (!isAuthenticated()) {
+    return <LoginScreen />;
+  }
 
+  // Mientras redirige, mostrar loading
   return (
-      <>
-        🎵 Spotify Taste Mixer
-      </>  
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-white">Redirecting to dashboard...</div>
+    </div>
   );
 }
-
-
