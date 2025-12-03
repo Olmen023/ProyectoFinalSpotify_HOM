@@ -11,8 +11,9 @@ function CallbackContent() {
   const hasProcessed = useRef(false);
 
   useEffect(() => {
-    // Prevenir ejecución duplicada
+    // Prevenir ejecución duplicada - marcar inmediatamente al inicio
     if (hasProcessed.current) return;
+    hasProcessed.current = true;
 
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -38,9 +39,6 @@ function CallbackContent() {
 
     // Limpiar state después de validar
     localStorage.removeItem('spotify_auth_state');
-
-    // Marcar como procesado
-    hasProcessed.current = true;
 
     // Intercambiar código por token
     const exchangeCodeForToken = async (code) => {
