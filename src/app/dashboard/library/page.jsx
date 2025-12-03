@@ -9,6 +9,9 @@ import FilterChips from '@/components/ui/FilterChips';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useSpotify } from '@/hooks/useSpotify';
 
+// Forzar renderizado dinámico para esta página
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de Your Library - Biblioteca personal del usuario
  */
@@ -82,7 +85,7 @@ export default function LibraryPage() {
         items = [];
     }
 
-    if (items.length === 0) {
+    if ((items?.length || 0) === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400">
           <Library size={64} className="mb-4 opacity-50" />
@@ -93,7 +96,7 @@ export default function LibraryPage() {
 
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {items.map((item) => (
+        {items?.map((item) => (
           <AlbumCard
             key={item.id}
             id={item.id}
@@ -151,7 +154,7 @@ export default function LibraryPage() {
                 <div className="flex items-center gap-3">
                   <Music className="text-blue-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{playlists.length}</p>
+                    <p className="text-2xl font-bold text-white">{playlists?.length || 0}</p>
                     <p className="text-sm text-gray-400">Playlists</p>
                   </div>
                 </div>
@@ -160,7 +163,7 @@ export default function LibraryPage() {
                 <div className="flex items-center gap-3">
                   <User className="text-green-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{artists.length}</p>
+                    <p className="text-2xl font-bold text-white">{artists?.length || 0}</p>
                     <p className="text-sm text-gray-400">Artists</p>
                   </div>
                 </div>
@@ -169,7 +172,7 @@ export default function LibraryPage() {
                 <div className="flex items-center gap-3">
                   <Disc className="text-purple-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{albums.length}</p>
+                    <p className="text-2xl font-bold text-white">{albums?.length || 0}</p>
                     <p className="text-sm text-gray-400">Albums</p>
                   </div>
                 </div>

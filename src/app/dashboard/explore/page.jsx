@@ -10,6 +10,9 @@ import FilterChips from '@/components/ui/FilterChips';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useDebounce } from '@/hooks/useDebounce';
 
+// Forzar renderizado dinámico para esta página
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de Explore - Descubre nueva música
  */
@@ -120,9 +123,9 @@ export default function ExplorePage() {
                 <div className="flex justify-center py-12">
                   <LoadingSpinner />
                 </div>
-              ) : searchResults.length > 0 ? (
+              ) : searchResults?.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {searchResults.map((item) => (
+                  {searchResults?.map((item) => (
                     <AlbumCard
                       key={item.id}
                       id={item.id}
@@ -155,9 +158,9 @@ export default function ExplorePage() {
               <h2 className="text-2xl font-bold text-white mb-4">
                 Recommended for You
               </h2>
-              {recommendedTracks.length > 0 ? (
+              {recommendedTracks?.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {recommendedTracks.map((track) => (
+                  {recommendedTracks?.map((track) => (
                     <AlbumCard
                       key={track.id}
                       id={track.id}

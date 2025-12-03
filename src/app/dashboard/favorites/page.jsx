@@ -10,6 +10,9 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useFavorites } from '@/hooks/useFavorites';
 
+// Forzar renderizado dinámico para esta página
+export const dynamic = 'force-dynamic';
+
 /**
  * Página de Liked Songs - Canciones favoritas del usuario
  */
@@ -44,7 +47,7 @@ export default function FavoritesPage() {
     alert('Playing all liked songs...');
   };
 
-  const sortedTracks = [...likedTracks].sort((a, b) => {
+  const sortedTracks = [...(likedTracks || [])].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
         return b.added_at - a.added_at;
@@ -57,7 +60,7 @@ export default function FavoritesPage() {
     }
   });
 
-  const totalDuration = likedTracks.reduce(
+  const totalDuration = (likedTracks || []).reduce(
     (acc, item) => acc + (item.track?.duration_ms || 0),
     0
   );
@@ -86,7 +89,7 @@ export default function FavoritesPage() {
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-semibold">{user?.display_name}</span>
                 <span className="text-gray-400">•</span>
-                <span className="text-gray-400">{likedTracks.length} songs</span>
+                <span className="text-gray-400">{likedTracks?.length || 0} songs</span>
                 {totalDuration > 0 && (
                   <>
                     <span className="text-gray-400">•</span>
@@ -106,7 +109,7 @@ export default function FavoritesPage() {
             <div className="flex items-center gap-4">
               <Button
                 onClick={handlePlayAll}
-                disabled={likedTracks.length === 0}
+                disabled={(likedTracks?.length || 0) === 0}
                 className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 flex items-center justify-center"
               >
                 <Play size={24} fill="black" className="text-black ml-1" />
@@ -140,7 +143,7 @@ export default function FavoritesPage() {
             <div className="flex justify-center py-12">
               <LoadingSpinner />
             </div>
-          ) : likedTracks.length > 0 ? (
+          ) : (likedTracks?.length || 0) > 0 ? (
             <div className="space-y-1">
               {/* Table Header */}
               <div className="grid grid-cols-[16px_6fr_4fr_3fr_1fr] gap-4 px-4 py-2 text-sm text-gray-400 border-b border-gray-800 mb-2">
@@ -152,7 +155,7 @@ export default function FavoritesPage() {
               </div>
 
               {/* Tracks */}
-              {sortedTracks.map((item, index) => (
+              {sortedTracks?.map((item, index) => (
                 <TrackCard
                   key={item.track.id}
                   track={item.track}
