@@ -22,7 +22,7 @@ export default function ArtistWidget({ selectedArtists = [], onSelect }) {
     const performSearch = async () => {
       if (debouncedQuery.trim().length > 0) {
         const results = await searchArtists(debouncedQuery);
-        setSearchResults(results);
+        setSearchResults(Array.isArray(results) ? results : []);
       } else {
         setSearchResults([]);
       }
@@ -55,7 +55,7 @@ export default function ArtistWidget({ selectedArtists = [], onSelect }) {
       </div>
 
       {/* Selected Artists */}
-      {selectedArtists.length > 0 && (
+      {Array.isArray(selectedArtists) && selectedArtists.length > 0 && (
         <div className="space-y-2 mb-4">
           {selectedArtists.map((artist) => (
             <div
@@ -110,7 +110,7 @@ export default function ArtistWidget({ selectedArtists = [], onSelect }) {
       {/* Search Results */}
       {loading && <LoadingSpinner className="py-4" />}
 
-      {!loading && searchResults.length > 0 && (
+      {!loading && Array.isArray(searchResults) && searchResults.length > 0 && (
         <div className="max-h-[300px] overflow-y-auto space-y-2">
           {searchResults.map((artist) => {
             const isSelected = selectedArtists.find((a) => a.id === artist.id);

@@ -40,7 +40,7 @@ export default function DecadeWidget({ selectedDecades = [], onSelect }) {
       </div>
 
       {/* Selected Decades */}
-      {selectedDecades.length > 0 && (
+      {Array.isArray(selectedDecades) && selectedDecades.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {selectedDecades.map((decadeValue) => {
             const decade = decades.find((d) => d.value === decadeValue);

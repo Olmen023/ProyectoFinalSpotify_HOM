@@ -20,8 +20,9 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
   useEffect(() => {
     const fetchGenres = async () => {
       const genres = await getGenres();
-      setAllGenres(genres);
-      setFilteredGenres(genres);
+      const genreArray = Array.isArray(genres) ? genres : [];
+      setAllGenres(genreArray);
+      setFilteredGenres(genreArray);
     };
     fetchGenres();
   }, [getGenres]);
@@ -30,9 +31,11 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
     if (searchQuery.trim() === '') {
       setFilteredGenres(allGenres);
     } else {
-      const filtered = allGenres.filter((genre) =>
-        genre.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const filtered = Array.isArray(allGenres)
+        ? allGenres.filter((genre) =>
+            genre.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : [];
       setFilteredGenres(filtered);
     }
   }, [searchQuery, allGenres]);
@@ -95,7 +98,7 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
       {/* Genre Grid */}
       {loading ? (
         <LoadingSpinner className="py-8" />
-      ) : (
+      ) : Array.isArray(filteredGenres) && filteredGenres.length > 0 ? (
         <div className="max-h-[300px] overflow-y-auto">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {filteredGenres.map((genre) => {
@@ -124,6 +127,10 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
             })}
           </div>
         </div>
+      ) : (
+        <p className="text-gray-400 text-sm text-center py-8">
+          No genres available
+        </p>
       )}
     </div>
   );

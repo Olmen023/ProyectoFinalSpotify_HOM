@@ -20,7 +20,7 @@ export default function TrackWidget({ selectedTracks = [], onSelect }) {
     const performSearch = async () => {
       if (debouncedQuery.trim().length > 0) {
         const results = await searchTracks(debouncedQuery);
-        setSearchResults(results);
+        setSearchResults(Array.isArray(results) ? results : []);
       } else {
         setSearchResults([]);
       }
@@ -57,7 +57,7 @@ export default function TrackWidget({ selectedTracks = [], onSelect }) {
       </div>
 
       {/* Selected Tracks */}
-      {selectedTracks.length > 0 && (
+      {Array.isArray(selectedTracks) && selectedTracks.length > 0 && (
         <div className="space-y-2 mb-4 max-h-[200px] overflow-y-auto">
           {selectedTracks.map((track) => (
             <div
@@ -82,7 +82,7 @@ export default function TrackWidget({ selectedTracks = [], onSelect }) {
                   {track.name}
                 </p>
                 <p className="text-gray-400 text-xs truncate">
-                  {track.artists?.map((a) => a.name).join(', ')}
+                  {Array.isArray(track.artists) ? track.artists.map((a) => a.name).join(', ') : 'Unknown Artist'}
                 </p>
               </div>
               <button
@@ -111,7 +111,7 @@ export default function TrackWidget({ selectedTracks = [], onSelect }) {
       {/* Search Results */}
       {loading && <LoadingSpinner className="py-4" />}
 
-      {!loading && searchResults.length > 0 && (
+      {!loading && Array.isArray(searchResults) && searchResults.length > 0 && (
         <div className="max-h-[300px] overflow-y-auto space-y-2">
           {searchResults.map((track) => {
             const isSelected = selectedTracks.find((t) => t.id === track.id);
@@ -148,7 +148,7 @@ export default function TrackWidget({ selectedTracks = [], onSelect }) {
                     {track.name}
                   </p>
                   <p className="text-gray-400 text-xs truncate">
-                    {track.artists?.map((a) => a.name).join(', ')}
+                    {Array.isArray(track.artists) ? track.artists.map((a) => a.name).join(', ') : 'Unknown Artist'}
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
