@@ -318,6 +318,32 @@ export function useSpotify() {
     }
   }, []);
 
+  const deletePlaylist = useCallback(async (playlistId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/followers`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to delete playlist');
+      return true;
+    } catch (err) {
+      setError(err.message);
+      console.error('Error deleting playlist:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const saveTrack = useCallback(async (trackId) => {
     setLoading(true);
     setError(null);
@@ -511,6 +537,7 @@ export function useSpotify() {
     createPlaylist,
     addTracksToPlaylist,
     removeTrackFromPlaylist,
+    deletePlaylist,
     generatePlaylist,
     saveTrack,
     removeTrack,

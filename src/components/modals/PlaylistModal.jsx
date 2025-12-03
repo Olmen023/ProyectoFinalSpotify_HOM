@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Play, Clock, Music, Plus } from 'lucide-react';
+import { X, Play, Clock, Music, Plus, Trash2 } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -10,7 +10,7 @@ import AddToPlaylistModal from './AddToPlaylistModal';
  * Modal para ver detalles de una playlist y gestionar canciones
  */
 export default function PlaylistModal({ playlistId, onClose }) {
-  const { getPlaylistDetails, getPlaylistTracks, removeTrackFromPlaylist } = useSpotify();
+  const { getPlaylistDetails, getPlaylistTracks, removeTrackFromPlaylist, deletePlaylist } = useSpotify();
   const [playlist, setPlaylist] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +50,25 @@ export default function PlaylistModal({ playlistId, onClose }) {
     } catch (error) {
       console.error('Error removing track:', error);
       alert('Error al eliminar la canción');
+    }
+  };
+
+  const handleDeletePlaylist = async () => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta playlist? Esta acción no se puede deshacer.')) return;
+
+    try {
+      const success = await deletePlaylist(playlistId);
+      if (success) {
+        alert('Playlist eliminada correctamente');
+        onClose();
+        // Recargar la página para actualizar la lista de playlists
+        window.location.reload();
+      } else {
+        throw new Error('Failed to delete playlist');
+      }
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      alert('Error al eliminar la playlist');
     }
   };
 
@@ -109,13 +128,24 @@ export default function PlaylistModal({ playlistId, onClose }) {
             )}
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
-          >
-            <X size={24} className="text-white" />
-          </button>
+          {/* Action Buttons */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            {/* Delete Button */}
+            <button
+              onClick={handleDeletePlaylist}
+              className="w-10 h-10 rounded-full bg-red-600/80 hover:bg-red-600 flex items-center justify-center transition-colors"
+              title="Delete playlist"
+            >
+              <Trash2 size={20} className="text-white" />
+            </button>
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+            >
+              <X size={24} className="text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Tracks List */}
