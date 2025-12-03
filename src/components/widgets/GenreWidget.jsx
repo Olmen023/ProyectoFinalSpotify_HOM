@@ -41,17 +41,19 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
   }, [searchQuery, allGenres]);
 
   const handleToggleGenre = (genre) => {
-    if (selectedGenres.includes(genre)) {
-      onSelect(selectedGenres.filter((g) => g !== genre));
+    const genres = Array.isArray(selectedGenres) ? selectedGenres : [];
+    if (genres.includes(genre)) {
+      onSelect(genres.filter((g) => g !== genre));
     } else {
-      if (selectedGenres.length < MAX_GENRES) {
-        onSelect([...selectedGenres, genre]);
+      if (genres.length < MAX_GENRES) {
+        onSelect([...genres, genre]);
       }
     }
   };
 
   const handleRemoveGenre = (genre) => {
-    onSelect(selectedGenres.filter((g) => g !== genre));
+    const genres = Array.isArray(selectedGenres) ? selectedGenres : [];
+    onSelect(genres.filter((g) => g !== genre));
   };
 
   return (
@@ -59,12 +61,12 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-white">Genres</h3>
         <span className="text-sm text-gray-400">
-          {selectedGenres.length}/{MAX_GENRES} selected
+          {Array.isArray(selectedGenres) ? selectedGenres.length : 0}/{MAX_GENRES} selected
         </span>
       </div>
 
       {/* Selected Genres */}
-      {selectedGenres.length > 0 && (
+      {Array.isArray(selectedGenres) && selectedGenres.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {selectedGenres.map((genre) => (
             <div
@@ -102,8 +104,9 @@ export default function GenreWidget({ selectedGenres = [], onSelect }) {
         <div className="max-h-[300px] overflow-y-auto">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {filteredGenres.map((genre) => {
-              const isSelected = selectedGenres.includes(genre);
-              const isDisabled = !isSelected && selectedGenres.length >= MAX_GENRES;
+              const genres = Array.isArray(selectedGenres) ? selectedGenres : [];
+              const isSelected = genres.includes(genre);
+              const isDisabled = !isSelected && genres.length >= MAX_GENRES;
 
               return (
                 <button

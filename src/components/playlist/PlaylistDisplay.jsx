@@ -24,8 +24,9 @@ export default function PlaylistDisplay({
     onRemoveTrack?.(trackId);
   };
 
-  const totalDuration = playlist.reduce(
-    (acc, track) => acc + track.duration_ms,
+  const playlistArray = Array.isArray(playlist) ? playlist : [];
+  const totalDuration = playlistArray.reduce(
+    (acc, track) => acc + (track?.duration_ms || 0),
     0
   );
   const formatTotalDuration = (ms) => {
@@ -45,7 +46,7 @@ export default function PlaylistDisplay({
     );
   }
 
-  if (playlist.length === 0) {
+  if (playlistArray.length === 0) {
     return (
       <div className="bg-[#181818] rounded-xl p-8 text-center">
         <div className="w-20 h-20 bg-[#2a2a2a] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -73,7 +74,7 @@ export default function PlaylistDisplay({
           className="text-2xl font-bold text-white bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-600 rounded px-2 py-1 -ml-2 mb-2"
         />
         <div className="flex items-center gap-4 text-sm text-gray-400">
-          <span>{playlist.length} songs</span>
+          <span>{playlistArray.length} songs</span>
           <span>•</span>
           <span>{formatTotalDuration(totalDuration)}</span>
         </div>
@@ -124,7 +125,7 @@ export default function PlaylistDisplay({
 
       {/* Track List */}
       <div className="space-y-1">
-        {playlist.map((track, index) => (
+        {playlistArray.map((track, index) => (
           <div key={track.id} className="flex items-center gap-4">
             <span className="text-gray-400 text-sm w-6 text-center hidden md:block">
               {index + 1}

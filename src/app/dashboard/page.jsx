@@ -85,14 +85,16 @@ export default function DashboardPage() {
   const handleAddMoreSongs = async () => {
     const newTracks = await generatePlaylist(preferences);
     // Filtrar duplicados
-    const existingIds = new Set(playlist.map((t) => t.id));
-    const uniqueNewTracks = newTracks.filter((t) => !existingIds.has(t.id));
-    setPlaylist([...playlist, ...uniqueNewTracks]);
+    const currentPlaylist = Array.isArray(playlist) ? playlist : [];
+    const existingIds = new Set(currentPlaylist.map((t) => t.id));
+    const uniqueNewTracks = Array.isArray(newTracks) ? newTracks.filter((t) => !existingIds.has(t.id)) : [];
+    setPlaylist([...currentPlaylist, ...uniqueNewTracks]);
   };
 
   // Eliminar canción de la playlist
   const handleRemoveTrack = (trackId) => {
-    setPlaylist(playlist.filter((track) => track.id !== trackId));
+    const currentPlaylist = Array.isArray(playlist) ? playlist : [];
+    setPlaylist(currentPlaylist.filter((track) => track.id !== trackId));
   };
 
   // Guardar en Spotify (opcional - requiere permisos adicionales)
