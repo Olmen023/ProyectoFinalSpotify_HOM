@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Heart, X, Music } from 'lucide-react';
+import { Play, Heart, X, Music, Plus } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 
 /**
@@ -10,6 +10,8 @@ export default function TrackCard({
   track,
   onRemove,
   showRemove = true,
+  showAddToPlaylist = false,
+  onAddToPlaylist,
   index,
   addedAt,
   showAlbum = false
@@ -135,6 +137,17 @@ export default function TrackCard({
 
       {/* Actions */}
       <div className="flex items-center gap-3">
+        {/* Add to Playlist Button */}
+        {showAddToPlaylist && (
+          <button
+            onClick={() => onAddToPlaylist?.(track)}
+            className="text-gray-400 hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+            title="Add to playlist"
+          >
+            <Plus size={18} />
+          </button>
+        )}
+
         {/* Favorite Button */}
         <button
           onClick={() => toggleFavorite(track)}

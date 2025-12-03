@@ -7,6 +7,7 @@ import TopBar from '@/components/layout/TopBar';
 import TrackCard from '@/components/playlist/TrackCard';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useFavorites } from '@/hooks/useFavorites';
 
@@ -20,6 +21,7 @@ export default function FavoritesClient() {
   const [likedTracks, setLikedTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('recent');
+  const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -168,6 +170,9 @@ export default function FavoritesClient() {
                     index={index + 1}
                     addedAt={item.added_at}
                     showAlbum={true}
+                    showAddToPlaylist={true}
+                    showRemove={false}
+                    onAddToPlaylist={setSelectedTrackForPlaylist}
                   />
                 ) : null
               ))}
@@ -183,6 +188,17 @@ export default function FavoritesClient() {
           )}
         </div>
       </main>
+
+      {/* Add to Playlist Modal */}
+      {selectedTrackForPlaylist && (
+        <AddToPlaylistModal
+          track={selectedTrackForPlaylist}
+          onClose={() => setSelectedTrackForPlaylist(null)}
+          onSuccess={() => {
+            console.log('Track added to playlist successfully!');
+          }}
+        />
+      )}
     </div>
   );
 }

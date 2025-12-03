@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Play, Clock, Music } from 'lucide-react';
+import { X, Play, Clock, Music, Plus } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AddToPlaylistModal from './AddToPlaylistModal';
 
 /**
  * Modal para ver detalles de una playlist y gestionar canciones
@@ -13,6 +14,7 @@ export default function PlaylistModal({ playlistId, onClose }) {
   const [playlist, setPlaylist] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
 
   useEffect(() => {
     if (!playlistId) return;
@@ -125,7 +127,7 @@ export default function PlaylistModal({ playlistId, onClose }) {
           ) : tracks.length > 0 ? (
             <div className="space-y-1">
               {/* Table Header */}
-              <div className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_40px] gap-4 px-4 py-3 text-sm text-gray-400 border-b border-gray-800 mb-2 sticky top-0 bg-[#121212]">
+              <div className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-3 text-sm text-gray-400 border-b border-gray-800 mb-2 sticky top-0 bg-[#121212]">
                 <span>#</span>
                 <span>Title</span>
                 <span>Album</span>
@@ -142,7 +144,7 @@ export default function PlaylistModal({ playlistId, onClose }) {
                 return (
                   <div
                     key={`${track.id}-${index}`}
-                    className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_40px] gap-4 px-4 py-2 rounded hover:bg-[#2a2a2a] transition-colors group items-center"
+                    className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-2 rounded hover:bg-[#2a2a2a] transition-colors group items-center"
                   >
                     {/* Index */}
                     <span className="text-gray-400 text-sm text-center">{index + 1}</span>
@@ -193,8 +195,17 @@ export default function PlaylistModal({ playlistId, onClose }) {
                       </span>
                     </div>
 
-                    {/* Remove Button */}
-                    <div className="flex justify-center">
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-2">
+                      {/* Add to Playlist Button */}
+                      <button
+                        onClick={() => setSelectedTrackForPlaylist(track)}
+                        className="text-gray-400 hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Add to another playlist"
+                      >
+                        <Plus size={18} />
+                      </button>
+                      {/* Remove Button */}
                       <button
                         onClick={() => handleRemoveTrack(track.uri)}
                         className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -215,6 +226,17 @@ export default function PlaylistModal({ playlistId, onClose }) {
           )}
         </div>
       </div>
+
+      {/* Add to Playlist Modal */}
+      {selectedTrackForPlaylist && (
+        <AddToPlaylistModal
+          track={selectedTrackForPlaylist}
+          onClose={() => setSelectedTrackForPlaylist(null)}
+          onSuccess={() => {
+            console.log('Track added to another playlist!');
+          }}
+        />
+      )}
     </div>
   );
 }

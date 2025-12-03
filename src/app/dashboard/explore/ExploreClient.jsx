@@ -7,6 +7,7 @@ import TopBar from '@/components/layout/TopBar';
 import AlbumCard from '@/components/ui/AlbumCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import FilterChips from '@/components/ui/FilterChips';
+import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useDebounce } from '@/hooks/useDebounce';
 
@@ -21,6 +22,7 @@ export default function ExploreClient() {
   const [recommendedTracks, setRecommendedTracks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -147,6 +149,9 @@ export default function ExploreClient() {
                           'Unknown'
                         }
                         type={item.type || 'track'}
+                        track={item}
+                        showAddButton={item.type === 'track' || activeCategory === 'tracks'}
+                        onAddToPlaylist={setSelectedTrackForPlaylist}
                       />
                     ) : null
                   ))}
@@ -180,6 +185,9 @@ export default function ExploreClient() {
                         image={track.album?.images?.[0]?.url || '/placeholder.png'}
                         artist={track.artists?.[0]?.name || 'Unknown'}
                         type="track"
+                        track={track}
+                        showAddButton={true}
+                        onAddToPlaylist={setSelectedTrackForPlaylist}
                       />
                     ) : null
                   ))}
@@ -194,6 +202,17 @@ export default function ExploreClient() {
           )}
         </div>
       </main>
+
+      {/* Add to Playlist Modal */}
+      {selectedTrackForPlaylist && (
+        <AddToPlaylistModal
+          track={selectedTrackForPlaylist}
+          onClose={() => setSelectedTrackForPlaylist(null)}
+          onSuccess={() => {
+            console.log('Track added successfully!');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { RefreshCw, Plus, Save, Download } from 'lucide-react';
 import TrackCard from './TrackCard';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 
 /**
  * Componente principal para visualizar y gestionar playlist generada
@@ -19,6 +20,7 @@ export default function PlaylistDisplay({
   loading = false,
 }) {
   const [playlistName, setPlaylistName] = useState('My Custom Playlist');
+  const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
 
   const handleRemoveTrack = (trackId) => {
     onRemoveTrack?.(trackId);
@@ -131,11 +133,27 @@ export default function PlaylistDisplay({
               {index + 1}
             </span>
             <div className="flex-1">
-              <TrackCard track={track} onRemove={handleRemoveTrack} />
+              <TrackCard
+                track={track}
+                onRemove={handleRemoveTrack}
+                showAddToPlaylist={true}
+                onAddToPlaylist={setSelectedTrackForPlaylist}
+              />
             </div>
           </div>
         ))}
       </div>
+
+      {/* Add to Playlist Modal */}
+      {selectedTrackForPlaylist && (
+        <AddToPlaylistModal
+          track={selectedTrackForPlaylist}
+          onClose={() => setSelectedTrackForPlaylist(null)}
+          onSuccess={() => {
+            console.log('Track added to playlist successfully!');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { Play } from 'lucide-react';
+import { Play, Plus } from 'lucide-react';
 
 /**
  * Tarjeta de álbum/artista con efecto hover y botón play
@@ -15,7 +15,10 @@ export default function AlbumCard({
   title,
   subtitle,
   onClick,
-  onPlayClick
+  onPlayClick,
+  onAddToPlaylist,
+  showAddButton = false,
+  track // Para poder añadir a playlist
 }) {
   // Usar nuevas props con fallback a props antiguas
   const displayTitle = name || title || 'Unknown';
@@ -33,15 +36,30 @@ export default function AlbumCard({
           alt={displayTitle}
           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Botón Play (aparece en hover) */}
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onPlayClick?.();
-          }}
-          className="absolute bottom-2 right-2 bg-blue-600 rounded-full p-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all shadow-xl hover:bg-blue-500 hover:scale-105"
-        >
-          <Play fill="white" size={20} className="text-white" />
+        {/* Botones (aparecen en hover) */}
+        <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
+          {/* Botón Add to Playlist */}
+          {showAddButton && onAddToPlaylist && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToPlaylist(track);
+              }}
+              className="bg-green-600 rounded-full p-3 shadow-xl hover:bg-green-500 hover:scale-105 transition-all"
+            >
+              <Plus size={20} className="text-white" />
+            </div>
+          )}
+          {/* Botón Play */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              onPlayClick?.();
+            }}
+            className="bg-blue-600 rounded-full p-3 shadow-xl hover:bg-blue-500 hover:scale-105 transition-all"
+          >
+            <Play fill="white" size={20} className="text-white" />
+          </div>
         </div>
       </div>
       <h3 className="font-bold text-white text-base truncate">{displayTitle}</h3>
