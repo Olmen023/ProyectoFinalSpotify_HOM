@@ -66,18 +66,42 @@ export function useSpotify() {
   }, [spotifyFetch]);
 
   const getGenres = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await spotifyFetch('/recommendations/available-genre-seeds');
-      return data.genres;
-    } catch (err) {
-      setError(err.message);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [spotifyFetch]);
+    // Usar lista hardcodeada de géneros populares en lugar del endpoint problemático
+    // El endpoint /recommendations/available-genre-seeds devuelve 404 inconsistentemente
+    const popularGenres = [
+      'acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient',
+      'anime', 'black-metal', 'bluegrass', 'blues', 'bossanova',
+      'brazil', 'breakbeat', 'british', 'cantopop', 'chicago-house',
+      'children', 'chill', 'classical', 'club', 'comedy',
+      'country', 'dance', 'dancehall', 'death-metal', 'deep-house',
+      'detroit-techno', 'disco', 'disney', 'drum-and-bass', 'dub',
+      'dubstep', 'edm', 'electro', 'electronic', 'emo',
+      'folk', 'forro', 'french', 'funk', 'garage',
+      'german', 'gospel', 'goth', 'grindcore', 'groove',
+      'grunge', 'guitar', 'happy', 'hard-rock', 'hardcore',
+      'hardstyle', 'heavy-metal', 'hip-hop', 'holidays', 'honky-tonk',
+      'house', 'idm', 'indian', 'indie', 'indie-pop',
+      'industrial', 'iranian', 'j-dance', 'j-idol', 'j-pop',
+      'j-rock', 'jazz', 'k-pop', 'kids', 'latin',
+      'latino', 'malay', 'mandopop', 'metal', 'metal-misc',
+      'metalcore', 'minimal-techno', 'movies', 'mpb', 'new-age',
+      'new-release', 'opera', 'pagode', 'party', 'philippines-opm',
+      'piano', 'pop', 'pop-film', 'post-dubstep', 'power-pop',
+      'progressive-house', 'psych-rock', 'punk', 'punk-rock', 'r-n-b',
+      'rainy-day', 'reggae', 'reggaeton', 'road-trip', 'rock',
+      'rock-n-roll', 'rockabilly', 'romance', 'sad', 'salsa',
+      'samba', 'sertanejo', 'show-tunes', 'singer-songwriter', 'ska',
+      'sleep', 'songwriter', 'soul', 'soundtracks', 'spanish',
+      'study', 'summer', 'swedish', 'synth-pop', 'tango',
+      'techno', 'trance', 'trip-hop', 'turkish', 'work-out',
+      'world-music'
+    ];
+
+    return new Promise((resolve) => {
+      // Simular pequeño delay para mantener consistencia con otras llamadas API
+      setTimeout(() => resolve(popularGenres), 100);
+    });
+  }, []);
 
   const getArtistTopTracks = useCallback(async (artistId) => {
     setLoading(true);
@@ -309,6 +333,18 @@ export function useSpotify() {
   }, [spotifyFetch]);
 
   /**
+   * Función auxiliar para mezclar aleatoriamente un array (Fisher-Yates shuffle)
+   */
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  /**
    * Genera una playlist basada en las preferencias del usuario
    * Usa artist top tracks y búsqueda por géneros
    */
@@ -386,6 +422,9 @@ export function useSpotify() {
           }
         });
       }
+
+      // Mezclar aleatoriamente las canciones para variedad
+      tracks = shuffleArray(tracks);
 
       // Limitar a 30 canciones
       return tracks.slice(0, 30);

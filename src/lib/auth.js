@@ -16,7 +16,10 @@ export function getSpotifyAuthUrl() {
 
   // Guardar el state para validación posterior (prevenir CSRF)
   if (typeof window !== 'undefined') {
+    // Limpiar state antiguo antes de guardar el nuevo
+    localStorage.removeItem('spotify_auth_state');
     localStorage.setItem('spotify_auth_state', state);
+    console.log('Generated new auth state:', state);
   }
 
   const scope = [
