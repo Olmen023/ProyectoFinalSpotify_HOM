@@ -27,11 +27,16 @@ export default function ExploreClient() {
   // Cargar perfil y recomendaciones iniciales
   useEffect(() => {
     const loadInitialData = async () => {
-      const profile = await getUserProfile();
-      setUser(profile);
+      try {
+        const profile = await getUserProfile();
+        setUser(profile);
 
-      const topTracks = await getUserTopTracks(20);
-      setRecommendedTracks(topTracks);
+        const topTracks = await getUserTopTracks(20);
+        setRecommendedTracks(topTracks || []);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        setRecommendedTracks([]);
+      }
     };
     loadInitialData();
   }, [getUserProfile, getUserTopTracks]);
@@ -48,11 +53,14 @@ export default function ExploreClient() {
       try {
         if (activeCategory === 'all' || activeCategory === 'tracks') {
           const tracks = await searchTracks(debouncedSearch);
-          setSearchResults(tracks);
+          setSearchResults(tracks || []);
         } else if (activeCategory === 'artists') {
           const artists = await searchArtists(debouncedSearch);
-          setSearchResults(artists);
+          setSearchResults(artists || []);
         }
+      } catch (error) {
+        console.error('Error performing search:', error);
+        setSearchResults([]);
       } finally {
         setLoading(false);
       }

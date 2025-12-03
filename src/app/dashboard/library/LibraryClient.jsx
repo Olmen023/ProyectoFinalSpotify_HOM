@@ -30,15 +30,20 @@ export default function LibraryClient() {
 
         // Cargar playlists
         const userPlaylists = await getUserPlaylists();
-        setPlaylists(userPlaylists);
+        setPlaylists(userPlaylists || []);
 
         // Cargar artistas favoritos
         const topArtists = await getUserTopArtists(20);
-        setArtists(topArtists);
+        setArtists(topArtists || []);
 
         // Cargar álbumes guardados
         const savedAlbums = await getUserSavedAlbums();
-        setAlbums(savedAlbums);
+        setAlbums(savedAlbums || []);
+      } catch (error) {
+        console.error('Error loading library data:', error);
+        setPlaylists([]);
+        setArtists([]);
+        setAlbums([]);
       } finally {
         setLoading(false);
       }

@@ -30,7 +30,10 @@ export default function FavoritesClient() {
 
         // Cargar canciones guardadas de Spotify
         const savedTracks = await getUserSavedTracks();
-        setLikedTracks(savedTracks);
+        setLikedTracks(savedTracks || []);
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        setLikedTracks([]);
       } finally {
         setLoading(false);
       }
