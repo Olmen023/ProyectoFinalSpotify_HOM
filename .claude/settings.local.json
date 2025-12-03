@@ -3,7 +3,11 @@
     "allow": [
       "mcp__ide__getDiagnostics",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix Vercel build error: force dynamic rendering for dashboard pages\n\nAdded ''export const dynamic = force-dynamic'' to dashboard pages (explore, favorites, library) to prevent Next.js from attempting static prerendering. These pages require authentication and dynamic Spotify API data, which are not available at build time.\n\nAlso added optional chaining safety checks to array operations to prevent ''Cannot read properties of undefined'' errors during server-side rendering.\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix Vercel build error: force dynamic rendering for dashboard pages\n\nAdded ''export const dynamic = force-dynamic'' to dashboard pages (explore, favorites, library) to prevent Next.js from attempting static prerendering. These pages require authentication and dynamic Spotify API data, which are not available at build time.\n\nAlso added optional chaining safety checks to array operations to prevent ''Cannot read properties of undefined'' errors during server-side rendering.\nEOF\n)\")",
+      "Bash(npm run build:*)",
+      "Bash(git commit:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
