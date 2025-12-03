@@ -23,8 +23,11 @@ export function getSpotifyAuthUrl() {
     'user-read-private',
     'user-read-email',
     'user-top-read',
+    'user-library-read',
+    'user-library-modify',
     'playlist-modify-public',
-    'playlist-modify-private'
+    'playlist-modify-private',
+    'playlist-read-private'
   ].join(' ');
 
   const params = new URLSearchParams({

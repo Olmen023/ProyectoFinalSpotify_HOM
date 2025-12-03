@@ -50,11 +50,15 @@ export default function FavoritesClient() {
   const sortedTracks = [...(likedTracks || [])].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
-        return b.added_at - a.added_at;
+        return (b.added_at || 0) - (a.added_at || 0);
       case 'title':
-        return a.track.name.localeCompare(b.track.name);
+        const aName = a?.track?.name || '';
+        const bName = b?.track?.name || '';
+        return aName.localeCompare(bName);
       case 'artist':
-        return a.track.artists[0].name.localeCompare(b.track.artists[0].name);
+        const aArtist = a?.track?.artists?.[0]?.name || '';
+        const bArtist = b?.track?.artists?.[0]?.name || '';
+        return aArtist.localeCompare(bArtist);
       default:
         return 0;
     }

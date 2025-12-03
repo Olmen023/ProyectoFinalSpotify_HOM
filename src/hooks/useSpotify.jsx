@@ -24,6 +24,9 @@ export function useSpotify() {
         // Token expirado - aquí podrías implementar refresh
         throw new Error('Token expired. Please login again.');
       }
+      if (response.status === 403) {
+        throw new Error('Permission denied. Please re-authenticate with required permissions.');
+      }
       throw new Error(`API Error: ${response.status}`);
     }
 
@@ -231,6 +234,76 @@ export function useSpotify() {
     }
   }, []);
 
+  const saveTrack = useCallback(async (trackId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/me/tracks`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: [trackId]
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to save track');
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const removeTrack = useCallback(async (trackId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/me/tracks`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: [trackId]
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to remove track');
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const checkSavedTracks = useCallback(async (trackIds) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/me/tracks/contains?ids=${trackIds.join(',')}`);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
   /**
    * Genera una playlist basada en las preferencias del usuario
    * Usa artist top tracks y búsqueda por géneros
@@ -336,6 +409,9 @@ export function useSpotify() {
     getUserSavedTracks,
     createPlaylist,
     addTracksToPlaylist,
-    generatePlaylist
+    generatePlaylist,
+    saveTrack,
+    removeTrack,
+    checkSavedTracks
   };
 }
