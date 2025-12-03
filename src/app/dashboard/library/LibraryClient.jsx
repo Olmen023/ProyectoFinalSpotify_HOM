@@ -98,24 +98,26 @@ export default function LibraryClient() {
 
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {items?.map((item) => (
-          <AlbumCard
-            key={item.id}
-            id={item.id}
-            name={item.name}
-            image={
-              item.images?.[0]?.url ||
-              item.album?.images?.[0]?.url ||
-              '/placeholder.png'
-            }
-            artist={
-              item.owner?.display_name ||
-              item.artists?.[0]?.name ||
-              item.type ||
-              'Unknown'
-            }
-            type={activeFilter === 'playlists' ? 'playlist' : item.type}
-          />
+        {Array.isArray(items) && items.map((item) => (
+          item && item.id ? (
+            <AlbumCard
+              key={item.id}
+              id={item.id}
+              name={item.name || 'Unknown'}
+              image={
+                item.images?.[0]?.url ||
+                item.album?.images?.[0]?.url ||
+                '/placeholder.png'
+              }
+              artist={
+                item.owner?.display_name ||
+                item.artists?.[0]?.name ||
+                item.type ||
+                'Unknown'
+              }
+              type={activeFilter === 'playlists' ? 'playlist' : (item.type || 'track')}
+            />
+          ) : null
         ))}
       </div>
     );
@@ -156,7 +158,7 @@ export default function LibraryClient() {
                 <div className="flex items-center gap-3">
                   <Music className="text-blue-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{playlists?.length || 0}</p>
+                    <p className="text-2xl font-bold text-white">{Array.isArray(playlists) ? playlists.length : 0}</p>
                     <p className="text-sm text-gray-400">Playlists</p>
                   </div>
                 </div>
@@ -165,7 +167,7 @@ export default function LibraryClient() {
                 <div className="flex items-center gap-3">
                   <User className="text-green-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{artists?.length || 0}</p>
+                    <p className="text-2xl font-bold text-white">{Array.isArray(artists) ? artists.length : 0}</p>
                     <p className="text-sm text-gray-400">Artists</p>
                   </div>
                 </div>
@@ -174,7 +176,7 @@ export default function LibraryClient() {
                 <div className="flex items-center gap-3">
                   <Disc className="text-purple-600" size={24} />
                   <div>
-                    <p className="text-2xl font-bold text-white">{albums?.length || 0}</p>
+                    <p className="text-2xl font-bold text-white">{Array.isArray(albums) ? albums.length : 0}</p>
                     <p className="text-sm text-gray-400">Albums</p>
                   </div>
                 </div>

@@ -128,25 +128,27 @@ export default function ExploreClient() {
                 <div className="flex justify-center py-12">
                   <LoadingSpinner />
                 </div>
-              ) : searchResults?.length > 0 ? (
+              ) : Array.isArray(searchResults) && searchResults.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {searchResults?.map((item) => (
-                    <AlbumCard
-                      key={item.id}
-                      id={item.id}
-                      name={item.name}
-                      image={
-                        item.album?.images?.[0]?.url ||
-                        item.images?.[0]?.url ||
-                        '/placeholder.png'
-                      }
-                      artist={
-                        item.artists?.[0]?.name ||
-                        item.type ||
-                        'Unknown'
-                      }
-                      type={item.type}
-                    />
+                  {searchResults.map((item) => (
+                    item && item.id ? (
+                      <AlbumCard
+                        key={item.id}
+                        id={item.id}
+                        name={item.name || 'Unknown'}
+                        image={
+                          item.album?.images?.[0]?.url ||
+                          item.images?.[0]?.url ||
+                          '/placeholder.png'
+                        }
+                        artist={
+                          item.artists?.[0]?.name ||
+                          item.type ||
+                          'Unknown'
+                        }
+                        type={item.type || 'track'}
+                      />
+                    ) : null
                   ))}
                 </div>
               ) : (
@@ -163,22 +165,29 @@ export default function ExploreClient() {
               <h2 className="text-2xl font-bold text-white mb-4">
                 Recommended for You
               </h2>
-              {recommendedTracks?.length > 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <LoadingSpinner />
+                </div>
+              ) : Array.isArray(recommendedTracks) && recommendedTracks.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {recommendedTracks?.map((track) => (
-                    <AlbumCard
-                      key={track.id}
-                      id={track.id}
-                      name={track.name}
-                      image={track.album?.images?.[0]?.url}
-                      artist={track.artists?.[0]?.name}
-                      type="track"
-                    />
+                  {recommendedTracks.map((track) => (
+                    track && track.id ? (
+                      <AlbumCard
+                        key={track.id}
+                        id={track.id}
+                        name={track.name || 'Unknown'}
+                        image={track.album?.images?.[0]?.url || '/placeholder.png'}
+                        artist={track.artists?.[0]?.name || 'Unknown'}
+                        type="track"
+                      />
+                    ) : null
                   ))}
                 </div>
               ) : (
-                <div className="flex justify-center py-12">
-                  <LoadingSpinner />
+                <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                  <p className="text-lg">No recommendations available</p>
+                  <p className="text-sm mt-2">Start listening to music to get personalized recommendations</p>
                 </div>
               )}
             </div>

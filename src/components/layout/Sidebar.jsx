@@ -26,12 +26,15 @@ export default function Sidebar() {
   }, [getUserProfile]);
 
   const handleCreatePlaylist = async (name, description, isPublic) => {
-    if (!user) return;
-
-    const playlist = await createPlaylist(user.id, name, description, isPublic);
+    const playlist = await createPlaylist(name, description, isPublic);
     if (playlist) {
-      // Redirigir a la biblioteca o mostrar éxito
+      // Cerrar modal y redirigir a la biblioteca
+      setIsModalOpen(false);
       router.push('/dashboard/library');
+      // Refresh para ver la nueva playlist
+      router.refresh();
+    } else {
+      alert('Failed to create playlist. Please try again.');
     }
   };
 

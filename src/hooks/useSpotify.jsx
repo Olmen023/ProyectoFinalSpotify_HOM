@@ -176,14 +176,14 @@ export function useSpotify() {
     }
   }, [spotifyFetch]);
 
-  const createPlaylist = useCallback(async (userId, name, description = '', isPublic = true) => {
+  const createPlaylist = useCallback(async (name, description = '', isPublic = true) => {
     setLoading(true);
     setError(null);
     try {
       const token = getAccessToken();
       if (!token) throw new Error('No token available');
 
-      const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+      const response = await fetch(`https://api.spotify.com/v1/me/playlists`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -196,10 +196,14 @@ export function useSpotify() {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to create playlist');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to create playlist');
+      }
       return await response.json();
     } catch (err) {
       setError(err.message);
+      console.error('Error creating playlist:', err);
       return null;
     } finally {
       setLoading(false);
