@@ -234,6 +234,34 @@ export function useSpotify() {
     }
   }, []);
 
+  const getPlaylistTracks = useCallback(async (playlistId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/playlists/${playlistId}/tracks`);
+      return data.items || [];
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
+  const getPlaylistDetails = useCallback(async (playlistId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await spotifyFetch(`/playlists/${playlistId}`);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
   const addTracksToPlaylist = useCallback(async (playlistId, trackUris) => {
     setLoading(true);
     setError(null);
@@ -253,6 +281,34 @@ export function useSpotify() {
       });
 
       if (!response.ok) throw new Error('Failed to add tracks to playlist');
+      return await response.json();
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const removeTrackFromPlaylist = useCallback(async (playlistId, trackUri) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAccessToken();
+      if (!token) throw new Error('No token available');
+
+      const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tracks: [{ uri: trackUri }]
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to remove track from playlist');
       return await response.json();
     } catch (err) {
       setError(err.message);
@@ -450,8 +506,11 @@ export function useSpotify() {
     getUserPlaylists,
     getUserSavedAlbums,
     getUserSavedTracks,
+    getPlaylistTracks,
+    getPlaylistDetails,
     createPlaylist,
     addTracksToPlaylist,
+    removeTrackFromPlaylist,
     generatePlaylist,
     saveTrack,
     removeTrack,

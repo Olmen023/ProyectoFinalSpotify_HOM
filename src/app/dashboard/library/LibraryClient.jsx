@@ -7,6 +7,7 @@ import TopBar from '@/components/layout/TopBar';
 import AlbumCard from '@/components/ui/AlbumCard';
 import FilterChips from '@/components/ui/FilterChips';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PlaylistModal from '@/components/modals/PlaylistModal';
 import { useSpotify } from '@/hooks/useSpotify';
 
 /**
@@ -20,6 +21,7 @@ export default function LibraryClient() {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('playlists');
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
 
   useEffect(() => {
     const loadLibraryData = async () => {
@@ -116,6 +118,11 @@ export default function LibraryClient() {
                 'Unknown'
               }
               type={activeFilter === 'playlists' ? 'playlist' : (item.type || 'track')}
+              onClick={() => {
+                if (activeFilter === 'playlists') {
+                  setSelectedPlaylistId(item.id);
+                }
+              }}
             />
           ) : null
         ))}
@@ -193,6 +200,14 @@ export default function LibraryClient() {
           </div>
         </div>
       </main>
+
+      {/* Playlist Modal */}
+      {selectedPlaylistId && (
+        <PlaylistModal
+          playlistId={selectedPlaylistId}
+          onClose={() => setSelectedPlaylistId(null)}
+        />
+      )}
     </div>
   );
 }
