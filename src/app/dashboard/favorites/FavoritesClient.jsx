@@ -47,27 +47,28 @@ export default function FavoritesClient() {
     alert('Playing all liked songs...');
   };
 
-  const sortedTracks = [...(likedTracks || [])].sort((a, b) => {
-    switch (sortBy) {
-      case 'recent':
-        return (b.added_at || 0) - (a.added_at || 0);
-      case 'title':
-        const aName = a?.track?.name || '';
-        const bName = b?.track?.name || '';
-        return aName.localeCompare(bName);
-      case 'artist':
-        const aArtist = a?.track?.artists?.[0]?.name || '';
-        const bArtist = b?.track?.artists?.[0]?.name || '';
-        return aArtist.localeCompare(bArtist);
-      default:
-        return 0;
-    }
-  });
+  const sortedTracks = Array.isArray(likedTracks)
+    ? [...likedTracks].sort((a, b) => {
+        switch (sortBy) {
+          case 'recent':
+            return (b.added_at || 0) - (a.added_at || 0);
+          case 'title':
+            const aName = a?.track?.name || '';
+            const bName = b?.track?.name || '';
+            return aName.localeCompare(bName);
+          case 'artist':
+            const aArtist = a?.track?.artists?.[0]?.name || '';
+            const bArtist = b?.track?.artists?.[0]?.name || '';
+            return aArtist.localeCompare(bArtist);
+          default:
+            return 0;
+        }
+      })
+    : [];
 
-  const totalDuration = (likedTracks || []).reduce(
-    (acc, item) => acc + (item.track?.duration_ms || 0),
-    0
-  );
+  const totalDuration = Array.isArray(likedTracks)
+    ? likedTracks.reduce((acc, item) => acc + (item.track?.duration_ms || 0), 0)
+    : 0;
   const hours = Math.floor(totalDuration / 3600000);
   const minutes = Math.floor((totalDuration % 3600000) / 60000);
 
@@ -159,14 +160,16 @@ export default function FavoritesClient() {
               </div>
 
               {/* Tracks */}
-              {sortedTracks?.map((item, index) => (
-                <TrackCard
-                  key={item.track.id}
-                  track={item.track}
-                  index={index + 1}
-                  addedAt={item.added_at}
-                  showAlbum={true}
-                />
+              {Array.isArray(sortedTracks) && sortedTracks.map((item, index) => (
+                item && item.track && item.track.id ? (
+                  <TrackCard
+                    key={item.track.id}
+                    track={item.track}
+                    index={index + 1}
+                    addedAt={item.added_at}
+                    showAlbum={true}
+                  />
+                ) : null
               ))}
             </div>
           ) : (

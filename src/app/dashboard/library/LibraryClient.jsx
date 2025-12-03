@@ -72,15 +72,15 @@ export default function LibraryClient() {
 
     switch (activeFilter) {
       case 'playlists':
-        items = playlists;
+        items = Array.isArray(playlists) ? playlists : [];
         emptyMessage = 'No playlists found. Create your first playlist!';
         break;
       case 'artists':
-        items = artists;
+        items = Array.isArray(artists) ? artists : [];
         emptyMessage = 'No artists found. Start listening to discover new artists!';
         break;
       case 'albums':
-        items = albums;
+        items = Array.isArray(albums) ? albums : [];
         emptyMessage = 'No albums saved. Save your favorite albums!';
         break;
       default:

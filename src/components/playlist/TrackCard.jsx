@@ -63,9 +63,9 @@ export default function TrackCard({
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-white font-medium truncate">{track.name}</p>
+            <p className="text-white font-medium truncate">{track.name || 'Unknown Track'}</p>
             <p className="text-gray-400 text-sm truncate">
-              {track.artists?.map((a) => a.name).join(', ')}
+              {Array.isArray(track.artists) ? track.artists.map((a) => a.name).join(', ') : 'Unknown Artist'}
             </p>
           </div>
         </div>
@@ -120,9 +120,9 @@ export default function TrackCard({
 
       {/* Track Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-white font-medium truncate">{track.name}</p>
+        <p className="text-white font-medium truncate">{track.name || 'Unknown Track'}</p>
         <p className="text-gray-400 text-sm truncate">
-          {track.artists?.map((a) => a.name).join(', ')}
+          {Array.isArray(track.artists) ? track.artists.map((a) => a.name).join(', ') : 'Unknown Artist'}
         </p>
       </div>
 
