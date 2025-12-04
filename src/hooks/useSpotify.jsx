@@ -428,7 +428,7 @@ export function useSpotify() {
 
   /**
    * Genera una playlist basada en las preferencias del usuario
-   * Usa artist top tracks y búsqueda por géneros
+   * Usa el Recommendations API de Spotify para mayor variedad
    */
   const generatePlaylist = useCallback(async (preferences) => {
     setLoading(true);
@@ -438,22 +438,132 @@ export function useSpotify() {
       let tracks = [];
       const seenIds = new Set();
 
-      // Por artistas seleccionados
-      if (preferences.artists && preferences.artists.length > 0) {
-        for (const artist of preferences.artists) {
-          const artistTracks = await getArtistTopTracks(artist.id);
-          artistTracks.forEach(track => {
+      // Construir seeds para el Recommendations API
+      const seedArtists = (preferences.artists || []).slice(0, 2).map(a => a.id);
+      const seedTracks = (preferences.tracks || []).slice(0, 2).map(t => t.id);
+      const seedGenres = (preferences.genres || []).slice(0, 2);
+
+      // Construir parámetros de audio features desde mood
+      const audioParams = {};
+      if (preferences.mood) {
+        if (preferences.mood.energy !== undefined) {
+          audioParams.target_energy = preferences.mood.energy / 100;
+        }
+        if (preferences.mood.valence !== undefined) {
+          audioParams.target_valence = preferences.mood.valence / 100;
+        }
+        if (preferences.mood.danceability !== undefined) {
+          audioParams.target_danceability = preferences.mood.danceability / 100;
+        }
+        if (preferences.mood.acousticness !== undefined) {
+          audioParams.target_acousticness = preferences.mood.acousticness / 100;
+        }
+      }
+
+      // Añadir filtros de popularidad
+      if (preferences.popularity) {
+        const { min, max } = preferences.popularity;
+        if (min > 0) audioParams.min_popularity = min;
+        if (max < 100) audioParams.max_popularity = max;
+      }
+
+      // Calcular rango de años para decades
+      if (preferences.decades && preferences.decades.length > 0) {
+        const years = preferences.decades.map(d => parseInt(d));
+        const minYear = Math.min(...years);
+        const maxYear = Math.max(...years) + 9;
+        const currentYear = new Date().getFullYear();
+
+        // Convertir a timestamp unix (en segundos)
+        const minDate = new Date(minYear, 0, 1);
+        const maxDate = new Date(Math.min(maxYear, currentYear), 11, 31);
+
+        audioParams.min_release_date = minDate.toISOString().split('T')[0];
+        audioParams.max_release_date = maxDate.toISOString().split('T')[0];
+      }
+
+      // Función para hacer llamada al Recommendations API
+      const getRecommendations = async (artists, genres, trackIds, limit = 20) => {
+        const params = new URLSearchParams();
+
+        if (artists.length > 0) params.append('seed_artists', artists.join(','));
+        if (genres.length > 0) params.append('seed_genres', genres.join(','));
+        if (trackIds.length > 0) params.append('seed_tracks', trackIds.join(','));
+
+        params.append('limit', limit);
+
+        // Añadir parámetros de audio
+        Object.keys(audioParams).forEach(key => {
+          params.append(key, audioParams[key]);
+        });
+
+        try {
+          const data = await spotifyFetch(`/recommendations?${params.toString()}`);
+          return data.tracks || [];
+        } catch (err) {
+          console.error('Error getting recommendations:', err);
+          return [];
+        }
+      };
+
+      // Estrategia 1: Usar seeds del usuario
+      const totalSeeds = seedArtists.length + seedGenres.length + seedTracks.length;
+
+      if (totalSeeds > 0) {
+        // Hacer múltiples llamadas con diferentes combinaciones para más variedad
+        const calls = [];
+
+        // Llamada 1: Con todos los seeds disponibles (máximo 5)
+        const allSeeds = {
+          artists: seedArtists.slice(0, 2),
+          genres: seedGenres.slice(0, 2),
+          tracks: seedTracks.slice(0, 1)
+        };
+        calls.push(getRecommendations(allSeeds.artists, allSeeds.genres, allSeeds.tracks, 20));
+
+        // Llamada 2: Solo artistas y géneros (si hay)
+        if (seedArtists.length > 0 || seedGenres.length > 0) {
+          calls.push(getRecommendations(
+            seedArtists.slice(0, 3),
+            seedGenres.slice(0, 2),
+            [],
+            15
+          ));
+        }
+
+        // Llamada 3: Diferentes combinaciones de seeds para más variedad
+        if (seedGenres.length > 2) {
+          // Usar géneros diferentes
+          calls.push(getRecommendations(
+            seedArtists.slice(0, 2),
+            seedGenres.slice(2, 4),
+            [],
+            15
+          ));
+        }
+
+        // Esperar todas las llamadas
+        const results = await Promise.all(calls);
+
+        // Combinar resultados
+        results.forEach(trackList => {
+          trackList.forEach(track => {
             if (!seenIds.has(track.id)) {
               tracks.push(track);
               seenIds.add(track.id);
             }
           });
-        }
+        });
       }
 
-      // Por canciones seleccionadas directamente
-      if (preferences.tracks && preferences.tracks.length > 0) {
-        preferences.tracks.forEach(track => {
+      // Estrategia 2: Si no hay suficientes seeds, usar géneros populares
+      if (totalSeeds === 0 || tracks.length < 15) {
+        // Usar géneros variados para obtener diferentes resultados
+        const defaultGenres = ['pop', 'rock', 'indie', 'electronic', 'hip-hop', 'jazz', 'classical'];
+        const randomGenres = shuffleArray(defaultGenres).slice(0, 3);
+
+        const defaultRecs = await getRecommendations([], randomGenres, [], 20);
+        defaultRecs.forEach(track => {
           if (!seenIds.has(track.id)) {
             tracks.push(track);
             seenIds.add(track.id);
@@ -461,43 +571,13 @@ export function useSpotify() {
         });
       }
 
-      // Por géneros (buscar tracks populares de ese género)
-      if (preferences.genres && preferences.genres.length > 0) {
-        for (const genre of preferences.genres.slice(0, 3)) {
-          const genreTracks = await searchTracks(`genre:${genre}`);
-          genreTracks.slice(0, 10).forEach(track => {
-            if (!seenIds.has(track.id)) {
-              tracks.push(track);
-              seenIds.add(track.id);
-            }
-          });
-        }
-      }
+      // Estrategia 3: Si aún no hay suficientes, añadir algunas top tracks pero mezcladas
+      if (tracks.length < 10) {
+        const topTracks = await getUserTopTracks(15);
 
-      // Filtrar por década si está especificado
-      if (preferences.decades && preferences.decades.length > 0) {
-        tracks = tracks.filter(track => {
-          if (!track.album || !track.album.release_date) return false;
-          const year = parseInt(track.album.release_date.substring(0, 4));
-          return preferences.decades.some(decade => {
-            const decadeStart = parseInt(decade);
-            return year >= decadeStart && year < decadeStart + 10;
-          });
-        });
-      }
-
-      // Filtrar por popularidad si está especificado
-      if (preferences.popularity) {
-        const { min, max } = preferences.popularity;
-        tracks = tracks.filter(track =>
-          track.popularity >= min && track.popularity <= max
-        );
-      }
-
-      // Si no hay suficientes tracks, añadir top tracks del usuario
-      if (tracks.length < 20) {
-        const topTracks = await getUserTopTracks(30 - tracks.length);
-        topTracks.forEach(track => {
+        // Tomar solo algunas aleatoriamente para evitar repetición
+        const randomTopTracks = shuffleArray(topTracks).slice(0, 10);
+        randomTopTracks.forEach(track => {
           if (!seenIds.has(track.id)) {
             tracks.push(track);
             seenIds.add(track.id);
@@ -513,11 +593,12 @@ export function useSpotify() {
 
     } catch (err) {
       setError(err.message);
+      console.error('Error generating playlist:', err);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [getArtistTopTracks, searchTracks, getUserTopTracks]);
+  }, [spotifyFetch, getUserTopTracks]);
 
   return {
     loading,

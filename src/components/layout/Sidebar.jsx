@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Music, Home, Compass, Heart, PlusCircle, Library } from 'lucide-react';
+import { Music, Home, Compass, Heart, PlusCircle, Library, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSpotify } from '@/hooks/useSpotify';
@@ -40,6 +40,7 @@ export default function Sidebar() {
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/dashboard' },
+    { icon: Sparkles, label: 'Generate Playlist', href: '/dashboard/generate-playlist' },
     { icon: Compass, label: 'Explore', href: '/dashboard/explore' },
     { icon: Library, label: 'Your Library', href: '/dashboard/library' },
     { icon: Heart, label: 'Liked Songs', href: '/dashboard/favorites' },
