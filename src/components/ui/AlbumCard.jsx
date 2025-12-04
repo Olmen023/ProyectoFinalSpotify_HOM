@@ -25,9 +25,18 @@ export default function AlbumCard({
   const displaySubtitle = artist || subtitle || '';
   const displayImage = image || '/placeholder-album.png';
 
+  // Si es un track con botón de añadir, hacer que toda la tarjeta sea clickeable
+  const handleCardClick = () => {
+    if (showAddButton && onAddToPlaylist && track) {
+      onAddToPlaylist(track);
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={handleCardClick}
       className="group bg-[#181818] p-4 rounded-xl hover:bg-[#222] transition-colors cursor-pointer ease-in-out duration-200"
     >
       <div className="relative aspect-square rounded-md overflow-hidden mb-4 shadow-lg">
