@@ -108,23 +108,30 @@ export default function TrackCard({
         {/* Duration */}
         <div className="text-right flex items-center justify-end gap-3">
           {/* Play/Pause Button */}
-          {showPlayButton && (
-            <button
-              onClick={() => play(track)}
-              className={`transition-colors ${
-                isCurrentTrack && isPlaying
-                  ? 'text-blue-500 hover:text-blue-400'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-              title={isCurrentTrack && isPlaying ? 'Pause preview' : 'Play preview'}
-            >
-              {isCurrentTrack && isPlaying ? (
-                <Pause size={16} fill="currentColor" />
-              ) : (
-                <Play size={16} fill="currentColor" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={() => showPlayButton && play(track)}
+            disabled={!showPlayButton}
+            className={`transition-colors ${
+              !showPlayButton
+                ? 'text-gray-600 cursor-not-allowed'
+                : isCurrentTrack && isPlaying
+                ? 'text-blue-500 hover:text-blue-400'
+                : 'text-gray-400 hover:text-white'
+            }`}
+            title={
+              !showPlayButton
+                ? 'No preview available'
+                : isCurrentTrack && isPlaying
+                ? 'Pause preview'
+                : 'Play preview'
+            }
+          >
+            {isCurrentTrack && isPlaying ? (
+              <Pause size={16} fill="currentColor" />
+            ) : (
+              <Play size={16} fill="currentColor" />
+            )}
+          </button>
 
           <span className="text-gray-400 text-sm">
             {formatDuration(track.duration_ms)}
@@ -181,23 +188,30 @@ export default function TrackCard({
         )}
 
         {/* Play/Pause Button - Always visible */}
-        {showPlayButton && (
-          <button
-            onClick={() => play(track)}
-            className={`transition-colors ${
-              isCurrentTrack && isPlaying
-                ? 'text-blue-500 hover:text-blue-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-            title={isCurrentTrack && isPlaying ? 'Pause preview' : 'Play preview'}
-          >
-            {isCurrentTrack && isPlaying ? (
-              <Pause size={18} fill="currentColor" />
-            ) : (
-              <Play size={18} fill="currentColor" />
-            )}
-          </button>
-        )}
+        <button
+          onClick={() => showPlayButton && play(track)}
+          disabled={!showPlayButton}
+          className={`transition-colors ${
+            !showPlayButton
+              ? 'text-gray-600 cursor-not-allowed'
+              : isCurrentTrack && isPlaying
+              ? 'text-blue-500 hover:text-blue-400'
+              : 'text-gray-400 hover:text-white'
+          }`}
+          title={
+            !showPlayButton
+              ? 'No preview available'
+              : isCurrentTrack && isPlaying
+              ? 'Pause preview'
+              : 'Play preview'
+          }
+        >
+          {isCurrentTrack && isPlaying ? (
+            <Pause size={18} fill="currentColor" />
+          ) : (
+            <Play size={18} fill="currentColor" />
+          )}
+        </button>
 
         {/* Favorite Button */}
         <button
