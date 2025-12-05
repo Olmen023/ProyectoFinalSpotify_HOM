@@ -50,8 +50,23 @@ export default function TrackCard({
   if (index !== undefined && showAlbum) {
     return (
       <div className="grid grid-cols-[16px_6fr_4fr_3fr_1fr] gap-4 px-4 py-2 rounded hover:bg-[#2a2a2a] transition-colors group items-center">
-        {/* Index */}
-        <span className="text-gray-400 text-sm text-center">{index}</span>
+        {/* Index / Play Button */}
+        <div className="text-center">
+          {showPlayButton ? (
+            <button
+              onClick={() => play(track)}
+              className="text-gray-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+            >
+              {isCurrentTrack && isPlaying ? (
+                <Pause size={16} fill="currentColor" />
+              ) : (
+                <Play size={16} fill="currentColor" />
+              )}
+            </button>
+          ) : (
+            <span className="text-gray-400 text-sm">{index}</span>
+          )}
+        </div>
 
         {/* Title + Artist */}
         <div className="flex items-center gap-3 min-w-0">

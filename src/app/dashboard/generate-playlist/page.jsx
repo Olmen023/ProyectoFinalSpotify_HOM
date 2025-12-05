@@ -103,6 +103,11 @@ export default function GeneratePlaylistPage() {
     // Aquí implementarías la llamada a la API para crear playlist
   };
 
+  // Reordenar tracks
+  const handleReorderTracks = (newOrder) => {
+    setPlaylist(newOrder);
+  };
+
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden">
       {/* Sidebar Fija */}
@@ -189,6 +194,7 @@ export default function GeneratePlaylistPage() {
               onRefresh={handleRefreshPlaylist}
               onAddMore={handleAddMoreSongs}
               onSaveToSpotify={handleSaveToSpotify}
+              onReorderTracks={handleReorderTracks}
               loading={loading}
             />
           </div>
