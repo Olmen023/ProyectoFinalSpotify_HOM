@@ -1,7 +1,8 @@
 'use client';
 
-import { Play, Heart, X, Music, Plus } from 'lucide-react';
+import { Play, Pause, Heart, X, Music, Plus } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useAudioPlayerContext } from '@/contexts/AudioPlayerContext';
 
 /**
  * Tarjeta individual de canción en la playlist
@@ -17,7 +18,10 @@ export default function TrackCard({
   showAlbum = false
 }) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { currentTrack, isPlaying, play } = useAudioPlayerContext();
   const isFav = isFavorite(track.id);
+  const isCurrentTrack = currentTrack?.id === track.id;
+  const showPlayButton = track.preview_url;
 
   const formatDuration = (ms) => {
     const minutes = Math.floor(ms / 60000);
@@ -112,12 +116,21 @@ export default function TrackCard({
             <Music size={24} className="text-gray-500" />
           </div>
         )}
-        {/* Play button on hover */}
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
-            <Play fill="white" size={14} className="text-white ml-0.5" />
-          </button>
-        </div>
+        {/* Play/Pause button */}
+        {showPlayButton && (
+          <div className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity ${isCurrentTrack && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <button
+              onClick={() => play(track)}
+              className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors"
+            >
+              {isCurrentTrack && isPlaying ? (
+                <Pause fill="white" size={14} className="text-white" />
+              ) : (
+                <Play fill="white" size={14} className="text-white ml-0.5" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Track Info */}

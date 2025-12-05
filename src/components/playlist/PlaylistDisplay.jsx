@@ -1,15 +1,84 @@
 'use client';
 
-import { useState } from 'react';
-import { RefreshCw, Plus, Save, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { RefreshCw, Plus, Save, Download, GripVertical, Share2 } from 'lucide-react';
 import TrackCard from './TrackCard';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
+import SharePlaylistModal from '@/components/modals/SharePlaylistModal';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+/**
+ * Componente de item sortable
+ */
+function SortableTrackItem({ track, index, onRemove, onAddToPlaylist }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: track.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2"
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white transition-colors"
+      >
+        <GripVertical size={20} />
+      </div>
+
+      {/* Track Number */}
+      <span className="text-gray-400 text-sm w-6 text-center hidden md:block">
+        {index + 1}
+      </span>
+
+      {/* Track Card */}
+      <div className="flex-1">
+        <TrackCard
+          track={track}
+          onRemove={onRemove}
+          showAddToPlaylist={true}
+          onAddToPlaylist={onAddToPlaylist}
+        />
+      </div>
+    </div>
+  );
+}
 
 /**
  * Componente principal para visualizar y gestionar playlist generada
- * Incluye funcionalidades: eliminar tracks, favoritos, refrescar, añadir más
+ * Incluye funcionalidades: eliminar tracks, favoritos, refrescar, añadir más, drag & drop
  */
 export default function PlaylistDisplay({
   playlist = [],
@@ -17,16 +86,51 @@ export default function PlaylistDisplay({
   onRefresh,
   onAddMore,
   onSaveToSpotify,
+  onReorderTracks,
   loading = false,
 }) {
   const [playlistName, setPlaylistName] = useState('My Custom Playlist');
   const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [localPlaylist, setLocalPlaylist] = useState(playlist);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Actualizar playlist local cuando cambia la prop
+  useEffect(() => {
+    setLocalPlaylist(playlist);
+  }, [playlist]);
 
   const handleRemoveTrack = (trackId) => {
     onRemoveTrack?.(trackId);
   };
 
-  const playlistArray = Array.isArray(playlist) ? playlist : [];
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setLocalPlaylist((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+
+        // Notificar al componente padre del nuevo orden
+        if (onReorderTracks) {
+          onReorderTracks(newOrder);
+        }
+
+        return newOrder;
+      });
+    }
+  };
+
+  const playlistArray = Array.isArray(localPlaylist) ? localPlaylist : [];
   const totalDuration = playlistArray.reduce(
     (acc, track) => acc + (track?.duration_ms || 0),
     0
@@ -104,6 +208,16 @@ export default function PlaylistDisplay({
           Add More Songs
         </Button>
 
+        <Button
+          onClick={() => setShowShareModal(true)}
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Share2 size={16} />
+          Share
+        </Button>
+
         {onSaveToSpotify && (
           <Button
             onClick={onSaveToSpotify}
@@ -125,24 +239,29 @@ export default function PlaylistDisplay({
         <div className="w-32 text-right">DURATION</div>
       </div>
 
-      {/* Track List */}
-      <div className="space-y-1">
-        {playlistArray.map((track, index) => (
-          <div key={track.id} className="flex items-center gap-4">
-            <span className="text-gray-400 text-sm w-6 text-center hidden md:block">
-              {index + 1}
-            </span>
-            <div className="flex-1">
-              <TrackCard
+      {/* Track List with Drag & Drop */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={playlistArray.map(track => track.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-1">
+            {playlistArray.map((track, index) => (
+              <SortableTrackItem
+                key={track.id}
                 track={track}
+                index={index}
                 onRemove={handleRemoveTrack}
-                showAddToPlaylist={true}
                 onAddToPlaylist={setSelectedTrackForPlaylist}
               />
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Add to Playlist Modal */}
       {selectedTrackForPlaylist && (
@@ -152,6 +271,15 @@ export default function PlaylistDisplay({
           onSuccess={() => {
             console.log('Track added to playlist successfully!');
           }}
+        />
+      )}
+
+      {/* Share Playlist Modal */}
+      {showShareModal && (
+        <SharePlaylistModal
+          playlist={playlistArray}
+          playlistName={playlistName}
+          onClose={() => setShowShareModal(false)}
         />
       )}
     </div>

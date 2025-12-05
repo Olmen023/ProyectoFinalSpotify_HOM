@@ -414,6 +414,37 @@ export function useSpotify() {
     }
   }, [spotifyFetch]);
 
+  const getTracksByIds = useCallback(async (trackIds) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Spotify API limita a 50 tracks por llamada
+      const chunkSize = 50;
+      const chunks = [];
+
+      for (let i = 0; i < trackIds.length; i += chunkSize) {
+        chunks.push(trackIds.slice(i, i + chunkSize));
+      }
+
+      const results = await Promise.all(
+        chunks.map(chunk =>
+          spotifyFetch(`/tracks?ids=${chunk.join(',')}`)
+        )
+      );
+
+      // Combinar todos los resultados
+      const allTracks = results.flatMap(result => result.tracks || []);
+
+      // Filtrar tracks null o undefined
+      return allTracks.filter(track => track !== null && track !== undefined);
+    } catch (err) {
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [spotifyFetch]);
+
   /**
    * Función auxiliar para mezclar aleatoriamente un array (Fisher-Yates shuffle)
    */
@@ -622,6 +653,7 @@ export function useSpotify() {
     generatePlaylist,
     saveTrack,
     removeTrack,
-    checkSavedTracks
+    checkSavedTracks,
+    getTracksByIds
   };
 }
