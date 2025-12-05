@@ -1,10 +1,157 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Play, Clock, Music, Plus, Trash2 } from 'lucide-react';
+import { X, Play, Pause, Clock, Music, Plus, Trash2, GripVertical, Share2 } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AddToPlaylistModal from './AddToPlaylistModal';
+import SharePlaylistModal from './SharePlaylistModal';
+import { useAudioPlayerContext } from '@/contexts/AudioPlayerContext';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+/**
+ * Componente de track sortable
+ */
+function SortableTrack({ track, index, addedAt, onRemove, onAddToPlaylist }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: track.id });
+
+  const { currentTrack, isPlaying, play } = useAudioPlayerContext();
+  const isCurrentTrack = currentTrack?.id === track.id;
+  const showPlayButton = track.preview_url;
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const formatDuration = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="grid grid-cols-[20px_16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-2 rounded hover:bg-[#2a2a2a] transition-colors group items-center"
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white transition-colors"
+      >
+        <GripVertical size={16} />
+      </div>
+
+      {/* Index / Play Button */}
+      <div className="text-center">
+        {showPlayButton ? (
+          <button
+            onClick={() => play(track)}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            {isCurrentTrack && isPlaying ? (
+              <Pause size={16} fill="currentColor" />
+            ) : (
+              <Play size={16} fill="currentColor" />
+            )}
+          </button>
+        ) : (
+          <span className="text-gray-400 text-sm">{index + 1}</span>
+        )}
+      </div>
+
+      {/* Title + Artist */}
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-700 flex-shrink-0">
+          {track.album?.images?.[0]?.url ? (
+            <img
+              src={track.album.images[0].url}
+              alt={track.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Music size={16} className="text-gray-500" />
+            </div>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-white font-medium truncate">{track.name}</p>
+          <p className="text-gray-400 text-sm truncate">
+            {Array.isArray(track.artists)
+              ? track.artists.map((a) => a.name).join(', ')
+              : 'Unknown Artist'}
+          </p>
+        </div>
+      </div>
+
+      {/* Album */}
+      <div className="min-w-0">
+        <p className="text-gray-400 text-sm truncate">
+          {track.album?.name || 'Unknown Album'}
+        </p>
+      </div>
+
+      {/* Date Added */}
+      <div className="min-w-0">
+        <p className="text-gray-400 text-sm truncate">
+          {addedAt ? new Date(addedAt).toLocaleDateString() : '-'}
+        </p>
+      </div>
+
+      {/* Duration */}
+      <div className="text-right">
+        <span className="text-gray-400 text-sm">
+          {formatDuration(track.duration_ms || 0)}
+        </span>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={() => onAddToPlaylist(track)}
+          className="text-gray-400 hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+          title="Add to another playlist"
+        >
+          <Plus size={18} />
+        </button>
+        <button
+          onClick={() => onRemove(track.uri)}
+          className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+          title="Remove from playlist"
+        >
+          <X size={18} />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Modal para ver detalles de una playlist y gestionar canciones
@@ -15,6 +162,14 @@ export default function PlaylistModal({ playlistId, onClose }) {
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (!playlistId) return;
@@ -50,6 +205,19 @@ export default function PlaylistModal({ playlistId, onClose }) {
     } catch (error) {
       console.error('Error removing track:', error);
       alert('Error al eliminar la canción');
+    }
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setTracks((items) => {
+        const oldIndex = items.findIndex((item) => item.track?.id === active.id);
+        const newIndex = items.findIndex((item) => item.track?.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
   };
 
@@ -130,6 +298,14 @@ export default function PlaylistModal({ playlistId, onClose }) {
 
           {/* Action Buttons */}
           <div className="absolute top-4 right-4 flex gap-2">
+            {/* Share Button */}
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="w-10 h-10 rounded-full bg-blue-600/80 hover:bg-blue-600 flex items-center justify-center transition-colors"
+              title="Share playlist"
+            >
+              <Share2 size={20} className="text-white" />
+            </button>
             {/* Delete Button */}
             <button
               onClick={handleDeletePlaylist}
@@ -155,9 +331,10 @@ export default function PlaylistModal({ playlistId, onClose }) {
               <LoadingSpinner />
             </div>
           ) : tracks.length > 0 ? (
-            <div className="space-y-1">
+            <>
               {/* Table Header */}
-              <div className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-3 text-sm text-gray-400 border-b border-gray-800 mb-2 sticky top-0 bg-[#121212]">
+              <div className="grid grid-cols-[20px_16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-3 text-sm text-gray-400 border-b border-gray-800 mb-2 sticky top-0 bg-[#121212]">
+                <span></span>
                 <span>#</span>
                 <span>Title</span>
                 <span>Album</span>
@@ -166,88 +343,36 @@ export default function PlaylistModal({ playlistId, onClose }) {
                 <span></span>
               </div>
 
-              {/* Tracks */}
-              {tracks.map((item, index) => {
-                const track = item?.track;
-                if (!track || !track.id) return null;
+              {/* Tracks with Drag & Drop */}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={tracks.map(item => item.track?.id).filter(Boolean)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-1">
+                    {tracks.map((item, index) => {
+                      const track = item?.track;
+                      if (!track || !track.id) return null;
 
-                return (
-                  <div
-                    key={`${track.id}-${index}`}
-                    className="grid grid-cols-[16px_6fr_4fr_3fr_1fr_60px] gap-4 px-4 py-2 rounded hover:bg-[#2a2a2a] transition-colors group items-center"
-                  >
-                    {/* Index */}
-                    <span className="text-gray-400 text-sm text-center">{index + 1}</span>
-
-                    {/* Title + Artist */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-700 flex-shrink-0">
-                        {track.album?.images?.[0]?.url ? (
-                          <img
-                            src={track.album.images[0].url}
-                            alt={track.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Music size={16} className="text-gray-500" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-white font-medium truncate">{track.name}</p>
-                        <p className="text-gray-400 text-sm truncate">
-                          {Array.isArray(track.artists)
-                            ? track.artists.map((a) => a.name).join(', ')
-                            : 'Unknown Artist'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Album */}
-                    <div className="min-w-0">
-                      <p className="text-gray-400 text-sm truncate">
-                        {track.album?.name || 'Unknown Album'}
-                      </p>
-                    </div>
-
-                    {/* Date Added */}
-                    <div className="min-w-0">
-                      <p className="text-gray-400 text-sm truncate">
-                        {item.added_at ? new Date(item.added_at).toLocaleDateString() : '-'}
-                      </p>
-                    </div>
-
-                    {/* Duration */}
-                    <div className="text-right">
-                      <span className="text-gray-400 text-sm">
-                        {formatDuration(track.duration_ms || 0)}
-                      </span>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-center gap-2">
-                      {/* Add to Playlist Button */}
-                      <button
-                        onClick={() => setSelectedTrackForPlaylist(track)}
-                        className="text-gray-400 hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Add to another playlist"
-                      >
-                        <Plus size={18} />
-                      </button>
-                      {/* Remove Button */}
-                      <button
-                        onClick={() => handleRemoveTrack(track.uri)}
-                        className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Remove from playlist"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
+                      return (
+                        <SortableTrack
+                          key={track.id}
+                          track={track}
+                          index={index}
+                          addedAt={item.added_at}
+                          onRemove={handleRemoveTrack}
+                          onAddToPlaylist={setSelectedTrackForPlaylist}
+                        />
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </SortableContext>
+              </DndContext>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <Music size={64} className="mb-4 opacity-50" />
@@ -265,6 +390,15 @@ export default function PlaylistModal({ playlistId, onClose }) {
           onSuccess={() => {
             console.log('Track added to another playlist!');
           }}
+        />
+      )}
+
+      {/* Share Playlist Modal */}
+      {showShareModal && playlist && (
+        <SharePlaylistModal
+          playlist={tracks.map(item => item.track).filter(Boolean)}
+          playlistName={playlist.name}
+          onClose={() => setShowShareModal(false)}
         />
       )}
     </div>

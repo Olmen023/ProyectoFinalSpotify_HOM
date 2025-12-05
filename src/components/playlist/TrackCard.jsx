@@ -106,7 +106,26 @@ export default function TrackCard({
         </div>
 
         {/* Duration */}
-        <div className="text-right">
+        <div className="text-right flex items-center justify-end gap-3">
+          {/* Play/Pause Button */}
+          {showPlayButton && (
+            <button
+              onClick={() => play(track)}
+              className={`transition-colors ${
+                isCurrentTrack && isPlaying
+                  ? 'text-blue-500 hover:text-blue-400'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              title={isCurrentTrack && isPlaying ? 'Pause preview' : 'Play preview'}
+            >
+              {isCurrentTrack && isPlaying ? (
+                <Pause size={16} fill="currentColor" />
+              ) : (
+                <Play size={16} fill="currentColor" />
+              )}
+            </button>
+          )}
+
           <span className="text-gray-400 text-sm">
             {formatDuration(track.duration_ms)}
           </span>
@@ -129,21 +148,6 @@ export default function TrackCard({
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Music size={24} className="text-gray-500" />
-          </div>
-        )}
-        {/* Play/Pause button */}
-        {showPlayButton && (
-          <div className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity ${isCurrentTrack && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-            <button
-              onClick={() => play(track)}
-              className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors"
-            >
-              {isCurrentTrack && isPlaying ? (
-                <Pause fill="white" size={14} className="text-white" />
-              ) : (
-                <Play fill="white" size={14} className="text-white ml-0.5" />
-              )}
-            </button>
           </div>
         )}
       </div>
@@ -173,6 +177,25 @@ export default function TrackCard({
             title="Add to playlist"
           >
             <Plus size={18} />
+          </button>
+        )}
+
+        {/* Play/Pause Button - Always visible */}
+        {showPlayButton && (
+          <button
+            onClick={() => play(track)}
+            className={`transition-colors ${
+              isCurrentTrack && isPlaying
+                ? 'text-blue-500 hover:text-blue-400'
+                : 'text-gray-400 hover:text-white'
+            }`}
+            title={isCurrentTrack && isPlaying ? 'Pause preview' : 'Play preview'}
+          >
+            {isCurrentTrack && isPlaying ? (
+              <Pause size={18} fill="currentColor" />
+            ) : (
+              <Play size={18} fill="currentColor" />
+            )}
           </button>
         )}
 
