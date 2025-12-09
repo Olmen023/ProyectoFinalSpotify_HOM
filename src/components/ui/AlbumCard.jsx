@@ -35,7 +35,7 @@ import { Play, Plus } from 'lucide-react';
  * UTILIZADO EN:
  * - src/app/search/page.jsx (mostrar resultados de búsqueda)
  * - src/app/browse/page.jsx (mostrar álbumes y artistas)
- * - src/components/widgets/* (mostrar recomendaciones en widgets)
+ * - src/components/widgets/ (todos los widgets, mostrar recomendaciones)
  * - Cualquier lugar que necesite mostrar contenido musical en formato card
  *
  * @param {Object} props - Propiedades del componente

@@ -31,8 +31,8 @@
  * - src/components/modals/AddToPlaylistModal.jsx (cargando playlists)
  * - src/components/modals/PlaylistModal.jsx (cargando tracks)
  * - src/components/playlist/PlaylistDisplay.jsx (generando playlist)
- * - src/components/widgets/* (cargando datos de Spotify)
- * - src/app/*/page.jsx (múltiples páginas con estados de carga)
+ * - src/components/widgets/ (todos los widgets, cargando datos de Spotify)
+ * - src/app/ (múltiples páginas con estados de carga)
  *
  * @param {Object} props - Propiedades del componente
  * @param {string} props.size - Tamaño: 'sm' | 'md' | 'lg' (default: 'md')

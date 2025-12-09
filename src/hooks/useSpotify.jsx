@@ -28,8 +28,8 @@
  * - src/app/dashboard/explore/ExploreClient.jsx (explorar música)
  * - src/app/dashboard/library/LibraryClient.jsx (biblioteca del usuario)
  * - src/app/dashboard/generate-playlist/page.jsx (generar playlists)
- * - src/components/widgets/*.jsx (todos los widgets de búsqueda)
- * - src/components/modals/*.jsx (modales de playlist)
+ * - src/components/widgets/ (todos los widgets de búsqueda)
+ * - src/components/modals/ (modales de playlist)
  *
  * REFERENCIAS:
  * - Importa getAccessToken desde @/lib/auth (src/lib/auth.js)
