@@ -20,7 +20,6 @@ export function useAudioPlayer() {
 
       audioRef.current.addEventListener('error', () => {
         setIsPlaying(false);
-        console.error('Error playing audio');
       });
     }
 
@@ -34,7 +33,6 @@ export function useAudioPlayer() {
 
   const play = (track) => {
     if (!track?.preview_url) {
-      console.warn('No preview URL available for this track');
       return;
     }
 

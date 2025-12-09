@@ -34,7 +34,6 @@ export default function FavoritesClient() {
         const savedTracks = await getUserSavedTracks();
         setLikedTracks(savedTracks || []);
       } catch (error) {
-        console.error('Error loading favorites:', error);
         setLikedTracks([]);
       } finally {
         setLoading(false);
@@ -194,9 +193,6 @@ export default function FavoritesClient() {
         <AddToPlaylistModal
           track={selectedTrackForPlaylist}
           onClose={() => setSelectedTrackForPlaylist(null)}
-          onSuccess={() => {
-            console.log('Track added to playlist successfully!');
-          }}
         />
       )}
     </div>

@@ -33,7 +33,7 @@ export default function SharePlaylistModal({ playlist, playlistName, onClose }) 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      // Error silenciado
     }
   };
 
@@ -46,9 +46,7 @@ export default function SharePlaylistModal({ playlist, playlistName, onClose }) 
           url: shareUrl,
         });
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('Error sharing:', err);
-        }
+        // Error silenciado
       }
     } else {
       handleCopy();

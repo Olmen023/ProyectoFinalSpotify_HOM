@@ -17,7 +17,6 @@ export function useFavorites() {
       try {
         setFavorites(JSON.parse(stored));
       } catch (error) {
-        console.error('Error parsing favorites:', error);
         setFavorites([]);
       }
     }
@@ -47,7 +46,7 @@ export function useFavorites() {
         });
       }
     } catch (error) {
-      console.error('Error syncing favorite to Spotify:', error);
+      // Error silenciado
     }
   }, []);
 
@@ -75,7 +74,7 @@ export function useFavorites() {
         });
       }
     } catch (error) {
-      console.error('Error removing favorite from Spotify:', error);
+      // Error silenciado
     }
   }, []);
 

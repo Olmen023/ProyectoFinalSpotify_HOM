@@ -47,7 +47,6 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('Error en token exchange:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

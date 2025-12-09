@@ -227,7 +227,6 @@ export function useSpotify() {
       return await response.json();
     } catch (err) {
       setError(err.message);
-      console.error('Error creating playlist:', err);
       return null;
     } finally {
       setLoading(false);
@@ -337,7 +336,6 @@ export function useSpotify() {
       return true;
     } catch (err) {
       setError(err.message);
-      console.error('Error deleting playlist:', err);
       return false;
     } finally {
       setLoading(false);
@@ -532,7 +530,6 @@ export function useSpotify() {
           const data = await spotifyFetch(`/recommendations?${params.toString()}`);
           return data.tracks || [];
         } catch (err) {
-          console.error('Error getting recommendations:', err);
           return [];
         }
       };
@@ -624,7 +621,6 @@ export function useSpotify() {
 
     } catch (err) {
       setError(err.message);
-      console.error('Error generating playlist:', err);
       return [];
     } finally {
       setLoading(false);

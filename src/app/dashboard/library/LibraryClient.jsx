@@ -42,7 +42,6 @@ export default function LibraryClient() {
         const savedAlbums = await getUserSavedAlbums();
         setAlbums(savedAlbums || []);
       } catch (error) {
-        console.error('Error loading library data:', error);
         setPlaylists([]);
         setArtists([]);
         setAlbums([]);

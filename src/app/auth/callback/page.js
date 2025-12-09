@@ -35,23 +35,7 @@ function CallbackContent() {
     const savedStateLocal = localStorage.getItem('spotify_auth_state');
     const savedState = savedStateSession || savedStateLocal;
 
-    // Agregar logging detallado para debugging
-    console.log('=== CSRF STATE VALIDATION ===');
-    console.log('Received state from URL:', state);
-    console.log('Saved state in sessionStorage:', savedStateSession);
-    console.log('Saved state in localStorage:', savedStateLocal);
-    console.log('Using saved state:', savedState);
-    console.log('State exists?', !!state);
-    console.log('SavedState exists?', !!savedState);
-    console.log('States match?', state === savedState);
-    console.log('State length:', state?.length, 'SavedState length:', savedState?.length);
-
     if (!state || state !== savedState) {
-      console.error('❌ CSRF validation FAILED!');
-      console.error('Received:', state);
-      console.error('Expected (session):', savedStateSession);
-      console.error('Expected (local):', savedStateLocal);
-
       // Limpiar storages
       localStorage.removeItem('spotify_auth_state');
       sessionStorage.removeItem('spotify_auth_state');
@@ -59,8 +43,6 @@ function CallbackContent() {
       setError('Error de validación de seguridad (CSRF). Intenta iniciar sesión de nuevo.');
       return;
     }
-
-    console.log('✅ CSRF validation PASSED!');
 
     // Limpiar state después de validar de AMBOS storages
     localStorage.removeItem('spotify_auth_state');
@@ -88,7 +70,6 @@ function CallbackContent() {
         router.push('/dashboard');
 
       } catch (error) {
-        console.error('Error:', error);
         setError(error.message);
       }
     };

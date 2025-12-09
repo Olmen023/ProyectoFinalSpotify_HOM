@@ -268,9 +268,6 @@ export default function PlaylistDisplay({
         <AddToPlaylistModal
           track={selectedTrackForPlaylist}
           onClose={() => setSelectedTrackForPlaylist(null)}
-          onSuccess={() => {
-            console.log('Track added to playlist successfully!');
-          }}
         />
       )}
 

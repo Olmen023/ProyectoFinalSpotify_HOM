@@ -36,7 +36,6 @@ export default function ExploreClient() {
         const topTracks = await getUserTopTracks(20);
         setRecommendedTracks(topTracks || []);
       } catch (error) {
-        console.error('Error loading initial data:', error);
         setRecommendedTracks([]);
       }
     };
@@ -61,7 +60,6 @@ export default function ExploreClient() {
           setSearchResults(artists || []);
         }
       } catch (error) {
-        console.error('Error performing search:', error);
         setSearchResults([]);
       } finally {
         setLoading(false);
@@ -208,9 +206,6 @@ export default function ExploreClient() {
         <AddToPlaylistModal
           track={selectedTrackForPlaylist}
           onClose={() => setSelectedTrackForPlaylist(null)}
-          onSuccess={() => {
-            console.log('Track added successfully!');
-          }}
         />
       )}
     </div>

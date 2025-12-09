@@ -8,7 +8,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 /**
  * Modal para añadir una canción a una playlist existente
  */
-export default function AddToPlaylistModal({ track, onClose, onSuccess }) {
+export default function AddToPlaylistModal({ track, onClose }) {
   const { getUserPlaylists, addTracksToPlaylist, createPlaylist } = useSpotify();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,6 @@ export default function AddToPlaylistModal({ track, onClose, onSuccess }) {
         const userPlaylists = await getUserPlaylists();
         setPlaylists(Array.isArray(userPlaylists) ? userPlaylists : []);
       } catch (error) {
-        console.error('Error loading playlists:', error);
         setPlaylists([]);
       } finally {
         setLoading(false);
@@ -46,11 +45,9 @@ export default function AddToPlaylistModal({ track, onClose, onSuccess }) {
 
       // Mostrar checkmark por 1 segundo
       setTimeout(() => {
-        onSuccess?.();
         onClose();
       }, 1000);
     } catch (error) {
-      console.error('Error adding track to playlist:', error);
       alert('Error al añadir la canción a la playlist');
       setAdding(null);
     }
@@ -69,14 +66,12 @@ export default function AddToPlaylistModal({ track, onClose, onSuccess }) {
         await addTracksToPlaylist(newPlaylist.id, [track.uri]);
 
         setTimeout(() => {
-          onSuccess?.();
           onClose();
         }, 1000);
       } else {
         throw new Error('Failed to create playlist');
       }
     } catch (error) {
-      console.error('Error creating playlist:', error);
       alert('Error al crear la playlist');
     } finally {
       setCreating(false);

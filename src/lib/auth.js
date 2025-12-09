@@ -25,25 +25,14 @@ export function getSpotifyAuthUrl() {
       localStorage.setItem('spotify_auth_state', state);
       sessionStorage.setItem('spotify_auth_state', state);
 
-      console.log('=== AUTH STATE GENERATED ===');
-      console.log('Generated state:', state);
-      console.log('State length:', state.length);
-
       // Verificar que se guardó correctamente en ambos
       const localVerification = localStorage.getItem('spotify_auth_state');
       const sessionVerification = sessionStorage.getItem('spotify_auth_state');
 
-      console.log('localStorage verification:', localVerification);
-      console.log('sessionStorage verification:', sessionVerification);
-      console.log('localStorage matches?', localVerification === state);
-      console.log('sessionStorage matches?', sessionVerification === state);
-
       if (!localVerification && !sessionVerification) {
-        console.error('⚠️ WARNING: Could not save state to storage!');
         alert('Error: El navegador está bloqueando el almacenamiento. Por favor, desactiva el modo incógnito o permite cookies.');
       }
     } catch (error) {
-      console.error('Error saving auth state:', error);
       alert('Error al guardar el estado de autenticación. Por favor, verifica la configuración de tu navegador.');
     }
   }

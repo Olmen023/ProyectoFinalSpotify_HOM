@@ -185,7 +185,6 @@ export default function PlaylistModal({ playlistId, onClose }) {
         setPlaylist(playlistData);
         setTracks(Array.isArray(playlistTracks) ? playlistTracks : []);
       } catch (error) {
-        console.error('Error loading playlist:', error);
         setTracks([]);
       } finally {
         setLoading(false);
@@ -203,7 +202,6 @@ export default function PlaylistModal({ playlistId, onClose }) {
       // Actualizar la lista localmente
       setTracks(tracks.filter(item => item.track?.uri !== trackUri));
     } catch (error) {
-      console.error('Error removing track:', error);
       alert('Error al eliminar la canción');
     }
   };
@@ -235,7 +233,6 @@ export default function PlaylistModal({ playlistId, onClose }) {
         throw new Error('Failed to delete playlist');
       }
     } catch (error) {
-      console.error('Error deleting playlist:', error);
       alert('Error al eliminar la playlist');
     }
   };
@@ -387,9 +384,6 @@ export default function PlaylistModal({ playlistId, onClose }) {
         <AddToPlaylistModal
           track={selectedTrackForPlaylist}
           onClose={() => setSelectedTrackForPlaylist(null)}
-          onSuccess={() => {
-            console.log('Track added to another playlist!');
-          }}
         />
       )}
 

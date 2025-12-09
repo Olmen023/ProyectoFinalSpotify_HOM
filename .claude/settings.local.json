@@ -3,7 +3,11 @@
     "allow": [
       "Bash(Where-Object { $_Name -match \"dashboard|page\" })",
       "Bash(Select-Object -First 20 FullName)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run build:*)",
+      "Bash(git filter-branch -f --msg-filter '\nsed \"\"/🤖 Generated with/d\"\" | sed \"\"/Co-Authored-By: Claude/d\"\"\n' -- --all)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

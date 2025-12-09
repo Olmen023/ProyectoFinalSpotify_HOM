@@ -44,7 +44,6 @@ function SharedPlaylistContent() {
 
         setLoading(false);
       } catch (err) {
-        console.error('Error loading shared playlist:', err);
         setError('Failed to load playlist');
         setLoading(false);
       }
