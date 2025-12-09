@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Play, Pause, Clock, Music, Plus, Trash2, GripVertical, Share2 } from 'lucide-react';
+import { X, Play, Pause, Clock, Music, Plus, Trash2, GripVertical, Share2, RefreshCw } from 'lucide-react';
 import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AddToPlaylistModal from './AddToPlaylistModal';
@@ -147,14 +147,14 @@ function SortableTrack({ track, index, addedAt, onRemove, onAddToPlaylist }) {
       <div className="flex justify-center gap-2">
         <button
           onClick={() => onAddToPlaylist(track)}
-          className="text-gray-400 hover:text-green-500 transition-colors opacity-0 group-hover:opacity-100"
+          className="text-gray-400 hover:text-green-500 transition-all opacity-30 group-hover:opacity-100 hover:scale-110"
           title="Add to another playlist"
         >
           <Plus size={18} />
         </button>
         <button
           onClick={() => onRemove(track.uri)}
-          className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+          className="text-gray-400 hover:text-red-500 transition-all opacity-30 group-hover:opacity-100 hover:scale-110"
           title="Remove from playlist"
         >
           <X size={18} />
@@ -315,6 +315,24 @@ export default function PlaylistModal({ playlistId, onClose }) {
     }
   };
 
+  const handleRefreshPlaylist = async () => {
+    setLoading(true);
+    try {
+      const [playlistData, playlistTracks] = await Promise.all([
+        getPlaylistDetails(playlistId),
+        getPlaylistTracks(playlistId)
+      ]);
+
+      setPlaylist(playlistData);
+      setTracks(Array.isArray(playlistTracks) ? playlistTracks : []);
+    } catch (error) {
+      alert('Error al refrescar la playlist');
+      setTracks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDuration = (ms) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -373,6 +391,15 @@ export default function PlaylistModal({ playlistId, onClose }) {
 
           {/* Action Buttons */}
           <div className="absolute top-4 right-4 flex gap-2">
+            {/* Refresh Button */}
+            <button
+              onClick={handleRefreshPlaylist}
+              disabled={loading}
+              className="w-10 h-10 rounded-full bg-green-600/80 hover:bg-green-600 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh playlist"
+            >
+              <RefreshCw size={20} className="text-white" />
+            </button>
             {/* Share Button */}
             <button
               onClick={() => setShowShareModal(true)}
