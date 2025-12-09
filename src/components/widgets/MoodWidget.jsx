@@ -4,8 +4,64 @@ import { useState } from 'react';
 import { Smile, Frown, Zap, Heart } from 'lucide-react';
 
 /**
- * Widget para configurar mood/energía de la música
- * Sliders para Energy, Valence (felicidad), Danceability
+ * COMPONENTE: MoodWidget - Configurador de mood y energía musical
+ * ================================================================
+ * Widget para ajustar las características de audio de las canciones
+ * mediante sliders. Controla energy, valence (felicidad) y danceability.
+ * Incluye presets rápidos para moods comunes.
+ *
+ * FUNCIONALIDAD:
+ * - 3 sliders para ajustar características de audio (0-100):
+ *   * Energy: intensidad y actividad de la música
+ *   * Valence (Happiness): positividad musical
+ *   * Danceability: qué tan bailable es
+ * - 4 presets predefinidos con iconos:
+ *   * Happy (energético y positivo)
+ *   * Sad (bajo energy y valence)
+ *   * Energetic (máxima energía y bailabilidad)
+ *   * Chill (relajado, valence medio)
+ * - Valores mostrados en tiempo real junto a cada slider
+ * - CSS custom para thumbs de los sliders
+ *
+ * ARQUITECTURA:
+ * - Estado local sincronizado con prop mood inicial
+ * - Valores por defecto: 50 para cada característica
+ * - Presets que cambian todos los valores a la vez
+ * - Callbacks en cada cambio de slider
+ * - Estilos CSS inline para customizar range inputs
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo local de valores de sliders
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos para presets (Smile, Frown, Zap, Heart)
+ *
+ * REFERENCIAS:
+ * - No importa otros componentes
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (configurar mood para recomendaciones)
+ * - src/app/page.jsx (página principal con generador)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Object} props.mood - Objeto con valores iniciales {energy, valence, danceability}
+ * @param {Function} props.onSelect - Callback con objeto actualizado de mood
+ *
+ * @returns {JSX.Element} Widget de configuración de mood
+ *
+ * PRESETS DISPONIBLES:
+ * - Happy: { energy: 70, valence: 80, danceability: 70 }
+ * - Sad: { energy: 30, valence: 20, danceability: 30 }
+ * - Energetic: { energy: 90, valence: 60, danceability: 80 }
+ * - Chill: { energy: 40, valence: 60, danceability: 40 }
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Inicializa con valores de prop mood o defaults (50)
+ * 2. Usuario puede:
+ *    a) Hacer clic en preset: aplica valores predefinidos
+ *    b) Mover sliders manualmente: actualiza valor individual
+ * 3. Cada cambio llama a onSelect con objeto completo actualizado
+ * 4. Valores se usan en Spotify Recommendations API como targets
  */
 export default function MoodWidget({ mood = {}, onSelect }) {
   const [values, setValues] = useState({

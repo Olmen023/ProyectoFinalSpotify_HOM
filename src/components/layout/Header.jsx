@@ -4,7 +4,37 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 /**
- * Header con navegación back/forward (opcional)
+ * COMPONENTE: HEADER - ENCABEZADO CON NAVEGACIÓN
+ * ================================================
+ * Componente de encabezado que proporciona botones de navegación hacia atrás y adelante
+ * en el historial del navegador, similar a la interfaz de Spotify.
+ *
+ * CARACTERÍSTICAS:
+ * - Botones de navegación back/forward usando next/navigation router
+ * - Título opcional del encabezado
+ * - Área de acciones personalizables (botones, iconos, etc.)
+ *
+ * DEPENDENCIAS DE NEXT.JS:
+ * - useRouter: Hook para navegación programática del router de Next.js
+ *
+ * DEPENDENCIAS DE LUCIDE:
+ * - ChevronLeft, ChevronRight: Iconos de navegación
+ *
+ * UTILIZADO EN:
+ * - Actualmente no se está usando directamente en ningún componente
+ * - Disponible para ser usado en páginas que necesiten navegación
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {string} [props.title] - Título opcional a mostrar en el header
+ * @param {React.ReactNode} [props.actions] - Elementos JSX de acciones adicionales (botones, etc.)
+ *
+ * @returns {JSX.Element} - Encabezado con navegación y acciones
+ *
+ * EJEMPLO DE USO:
+ * <Header
+ *   title="Mi Página"
+ *   actions={<button>Acción</button>}
+ * />
  */
 export default function Header({ title, actions }) {
   const router = useRouter();

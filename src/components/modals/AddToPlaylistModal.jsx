@@ -6,7 +6,66 @@ import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
- * Modal para añadir una canción a una playlist existente
+ * COMPONENTE: AddToPlaylistModal - Modal para añadir canciones a playlists
+ * ===========================================================================
+ * Modal que permite al usuario añadir una canción específica a una de sus
+ * playlists existentes de Spotify, o crear una nueva playlist con esa canción.
+ * Muestra una lista de las playlists del usuario con opción de búsqueda.
+ *
+ * FUNCIONALIDAD:
+ * - Carga y muestra todas las playlists del usuario desde Spotify
+ * - Permite añadir la canción seleccionada a cualquier playlist existente
+ * - Opción para crear una nueva playlist e inmediatamente añadir la canción
+ * - Muestra información visual de la canción (cover, nombre, artista)
+ * - Feedback visual al añadir (checkmark verde) antes de cerrar el modal
+ * - Manejo de estados de carga durante las operaciones
+ *
+ * ARQUITECTURA:
+ * - Modal overlay con fondo oscuro blur y animaciones
+ * - Diseño responsive con altura máxima y scroll interno
+ * - Estados locales para manejar playlists, loading, y creación de nuevas
+ * - Cierra automáticamente después de añadir exitosamente (1 segundo delay)
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de estados locales (playlists, loading, form inputs)
+ * - useEffect: Carga inicial de playlists del usuario
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (X, Music, Plus, Check)
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/components/modals/PlaylistModal.jsx (para añadir tracks entre playlists)
+ * - src/components/playlist/PlaylistDisplay.jsx (para añadir tracks generados a playlists)
+ * - src/components/playlist/TrackCard.jsx (botón de añadir en cada track)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Object} props.track - Objeto de canción de Spotify con estructura completa
+ * @param {string} props.track.id - ID único de la canción en Spotify
+ * @param {string} props.track.uri - URI de Spotify (formato: spotify:track:xxx)
+ * @param {string} props.track.name - Nombre de la canción
+ * @param {Array} props.track.artists - Array de artistas de la canción
+ * @param {Object} props.track.album - Objeto con información del álbum
+ * @param {Array} props.track.album.images - Array de imágenes del álbum
+ * @param {Function} props.onClose - Callback para cerrar el modal
+ *
+ * @returns {JSX.Element|null} Modal de añadir a playlist o null si no hay track
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Al montar, useEffect llama a getUserPlaylists() para cargar playlists
+ * 2. Usuario ve lista de playlists con imágenes y contador de canciones
+ * 3. Usuario puede hacer clic en "Create new playlist" para mostrar formulario
+ * 4. Al hacer clic en una playlist:
+ *    - Llama a addTracksToPlaylist(playlistId, [track.uri])
+ *    - Muestra checkmark verde por 1 segundo
+ *    - Cierra el modal automáticamente
+ * 5. Al crear nueva playlist:
+ *    - Llama a createPlaylist(nombre, descripción, público)
+ *    - Automáticamente añade la canción a la nueva playlist
+ *    - Muestra feedback y cierra
  */
 export default function AddToPlaylistModal({ track, onClose }) {
   const { getUserPlaylists, addTracksToPlaylist, createPlaylist } = useSpotify();

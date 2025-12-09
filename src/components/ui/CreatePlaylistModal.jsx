@@ -5,7 +5,60 @@ import { X, Music, Lock, Globe } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 /**
- * Modal para crear una nueva playlist en Spotify
+ * COMPONENTE: CreatePlaylistModal - Modal de creación de playlists
+ * =================================================================
+ * Modal con formulario para crear una nueva playlist en Spotify.
+ * Permite configurar nombre, descripción y privacidad antes de crear.
+ *
+ * FUNCIONALIDAD:
+ * - Formulario con validación de nombre obligatorio
+ * - Campo de descripción opcional (textarea)
+ * - Toggle de privacidad: Public/Private con iconos
+ * - Resetea el formulario al cerrar o después de crear
+ * - Botón de crear deshabilitado durante loading
+ * - Cierra automáticamente después de crear exitosamente
+ *
+ * ARQUITECTURA:
+ * - Modal condicional (solo renderiza si isOpen=true)
+ * - Estados locales para campos del formulario
+ * - Backdrop con blur que cierra al hacer clic
+ * - Formulario HTML con submit handler
+ * - Limpieza de estado al cerrar
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de campos del formulario (name, description, isPublic)
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (X, Music, Lock, Globe)
+ *
+ * REFERENCIAS:
+ * - Importa Button desde @/components/ui/Button (src/components/ui/Button.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/playlists/page.jsx (crear nuevas playlists desde la página principal)
+ * - src/app/generator/page.jsx (guardar playlist generada en Spotify)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {boolean} props.isOpen - Si el modal está visible
+ * @param {Function} props.onClose - Callback para cerrar el modal
+ * @param {Function} props.onCreatePlaylist - Callback al crear (recibe: name, description, isPublic)
+ * @param {boolean} props.loading - Estado de carga durante creación
+ *
+ * @returns {JSX.Element|null} Modal de crear playlist o null si no está abierto
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Si isOpen=false, retorna null (no renderiza nada)
+ * 2. Usuario llena formulario:
+ *    - Nombre (obligatorio)
+ *    - Descripción (opcional)
+ *    - Privacidad (toggle Public/Private)
+ * 3. Al hacer submit:
+ *    - Valida que nombre no esté vacío
+ *    - Llama a onCreatePlaylist(name, description, isPublic)
+ *    - Llama a handleClose() que resetea campos
+ * 4. Al cerrar (X o backdrop):
+ *    - Resetea todos los campos a valores default
+ *    - Llama a onClose()
  */
 export default function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist, loading }) {
   const [name, setName] = useState('');

@@ -5,7 +5,80 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useAudioPlayerContext } from '@/contexts/AudioPlayerContext';
 
 /**
- * Tarjeta individual de canción en la playlist
+ * COMPONENTE: TrackCard - Tarjeta de canción individual
+ * ======================================================
+ * Componente reutilizable que muestra la información de una canción
+ * con controles de reproducción, favoritos, y acciones adicionales.
+ * Soporta dos formatos de visualización: card tradicional y formato tabla.
+ *
+ * FUNCIONALIDAD:
+ * - Muestra información completa de la canción (cover, título, artista, álbum)
+ * - Botón de reproducción de preview (30 segundos) integrado con AudioPlayer
+ * - Sistema de favoritos con persistencia en localStorage
+ * - Indicador visual cuando es la canción actual reproduciéndose
+ * - Botón para añadir a otra playlist (opcional)
+ * - Botón para eliminar de la playlist actual (opcional)
+ * - Muestra duración de la canción formateada
+ * - Dos modos de visualización: card o tabla (para páginas como Liked Songs)
+ * - Estados disabled si no hay preview_url disponible
+ *
+ * ARQUITECTURA:
+ * - Componente altamente configurable mediante props booleanas
+ * - Dos renders condicionales según props (tabla vs card)
+ * - Integración con múltiples contextos (AudioPlayer, Favorites)
+ * - Efectos hover para mostrar/ocultar botones de acción
+ * - Formateo de duración y fechas relativas
+ *
+ * DEPENDENCIAS DE REACT:
+ * - No usa hooks propios, solo hooks importados
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (Play, Pause, Heart, X, Music, Plus)
+ *
+ * REFERENCIAS:
+ * - Importa useFavorites desde @/hooks/useFavorites (src/hooks/useFavorites.jsx)
+ * - Importa useAudioPlayerContext desde @/contexts/AudioPlayerContext (src/contexts/AudioPlayerContext.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/components/playlist/PlaylistDisplay.jsx (lista de canciones generadas)
+ * - src/components/modals/PlaylistModal.jsx (dentro de SortableTrack)
+ * - src/app/liked-songs/page.jsx (formato tabla con showAlbum=true)
+ * - Cualquier lista de canciones que necesite mostrar tracks
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Object} props.track - Objeto completo de canción de Spotify
+ * @param {string} props.track.id - ID único de la canción
+ * @param {string} props.track.name - Nombre de la canción
+ * @param {Array} props.track.artists - Array de artistas
+ * @param {Object} props.track.album - Información del álbum
+ * @param {number} props.track.duration_ms - Duración en milisegundos
+ * @param {string} props.track.preview_url - URL del preview de 30seg (puede ser null)
+ * @param {Function} props.onRemove - Callback al eliminar (recibe track.id)
+ * @param {boolean} props.showRemove - Si muestra botón de eliminar (default: true)
+ * @param {boolean} props.showAddToPlaylist - Si muestra botón de añadir a playlist (default: false)
+ * @param {Function} props.onAddToPlaylist - Callback al añadir a playlist (recibe track)
+ * @param {number} props.index - Índice en lista (para formato tabla)
+ * @param {string} props.addedAt - Fecha ISO cuando se añadió (para formato tabla)
+ * @param {boolean} props.showAlbum - Si usa formato tabla con columna de álbum (default: false)
+ *
+ * @returns {JSX.Element} Tarjeta de canción en formato card o tabla
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Verifica si index y showAlbum están definidos para decidir formato
+ * 2. Obtiene estado de favorito desde useFavorites hook
+ * 3. Obtiene estado de reproducción desde AudioPlayerContext
+ * 4. Si es formato tabla (index !== undefined && showAlbum):
+ *    - Renderiza row de tabla con columnas: #/Play, Título+Artista, Álbum, Fecha, Duración
+ *    - Botón play visible solo en hover o si es track actual
+ * 5. Si es formato card (default):
+ *    - Renderiza card con cover, info, y botones de acción
+ *    - Botones de añadir/eliminar visibles solo en hover
+ * 6. Al hacer clic en play:
+ *    - Si hay preview_url, llama a play(track) del AudioPlayer
+ *    - Si no hay preview_url, botón está disabled
+ * 7. Botón de corazón:
+ *    - Llama a toggleFavorite(track) para añadir/quitar de favoritos
+ *    - Cambia color según estado isFavorite
  */
 export default function TrackCard({
   track,

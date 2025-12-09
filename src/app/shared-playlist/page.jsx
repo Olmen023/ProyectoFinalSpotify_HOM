@@ -1,3 +1,79 @@
+/**
+ * PÁGINA: SHARED PLAYLIST - VISUALIZACIÓN DE PLAYLISTS COMPARTIDAS
+ * ==================================================================
+ * Página pública para visualizar playlists compartidas mediante URL.
+ * Permite a usuarios (con o sin login) ver las canciones de una playlist compartida.
+ *
+ * FUNCIONALIDAD:
+ * - Carga playlist desde parámetros URL (tracks IDs y nombre)
+ * - Visualiza lista completa de canciones
+ * - Muestra portada generada, nombre y estadísticas
+ * - Botón para ir al dashboard
+ * - Manejo de errores (playlist inválida, fallo de carga)
+ * - Estados de carga con spinner
+ *
+ * ARQUITECTURA:
+ * - Client Component con Suspense boundary
+ * - Componente interno: SharedPlaylistContent (lógica principal)
+ * - Componente exportado: SharedPlaylistPage (wrapper con Suspense)
+ * - Estado local: playlist, playlistName, loading, error
+ *
+ * PARÁMETROS URL:
+ * - tracks: String - IDs de tracks separados por comas (ej: "id1,id2,id3")
+ * - name: String - Nombre codificado de la playlist
+ *
+ * EJEMPLO DE URL:
+ * /shared-playlist?tracks=3n3Ppam7vgaVa1iaRUc9Lp,7qiZfU4dY1lWllzX7mPBI&name=My%20Awesome%20Playlist
+ *
+ * FLUJO DE CARGA:
+ * 1. Página se monta, lee searchParams
+ * 2. Extrae trackIds y nombre de los parámetros
+ * 3. Llama a getTracksByIds() para obtener datos completos
+ * 4. Renderiza playlist con TrackCards
+ * 5. Si falla: muestra pantalla de error
+ *
+ * ESTADOS:
+ * - Loading: Muestra spinner mientras carga datos
+ * - Error: Muestra mensaje de error y botón al dashboard
+ * - Success: Muestra playlist completa con todas las canciones
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Estado local del componente
+ * - useEffect: Carga de datos desde URL
+ * - Suspense: Boundary para loading states
+ *
+ * DEPENDENCIAS DE NEXT.JS:
+ * - useSearchParams: Leer parámetros de query string
+ * - useRouter: Navegación al dashboard
+ *
+ * DEPENDENCIAS DE LUCIDE:
+ * - Music, Home, Heart: Iconos de la UI
+ *
+ * REFERENCIAS:
+ * - Importa TrackCard desde @/components/playlist/TrackCard (src/components/playlist/TrackCard.jsx)
+ * - Importa Button desde @/components/ui/Button (src/components/ui/Button.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ *
+ * GENERACIÓN DE URL:
+ * - Esta URL se genera en: src/components/modals/SharePlaylistModal.jsx
+ * - Función: generateShareUrl()
+ *
+ * UTILIZADO EN:
+ * - Ruta: /shared-playlist?tracks=...&name=...
+ * - Compartido por: SharePlaylistModal
+ * - Accesible: Públicamente (requiere Spotify login para reproducir)
+ *
+ * CARACTERÍSTICAS VISUALES:
+ * - Header con gradiente azul/morado
+ * - Portada generada con icono de música
+ * - Nombre de playlist y estadísticas
+ * - Lista completa de tracks con formato tabla
+ * - Diseño responsive
+ *
+ * @returns {JSX.Element} - Página de playlist compartida
+ */
+
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
@@ -8,6 +84,15 @@ import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useSpotify } from '@/hooks/useSpotify';
 
+/**
+ * SharedPlaylistContent - Componente interno con lógica de playlist compartida
+ *
+ * RESPONSABILIDADES:
+ * - Leer parámetros de URL
+ * - Cargar datos de tracks desde Spotify API
+ * - Renderizar UI de la playlist
+ * - Manejar estados de loading y error
+ */
 function SharedPlaylistContent() {
   const searchParams = useSearchParams();
   const router = useRouter();

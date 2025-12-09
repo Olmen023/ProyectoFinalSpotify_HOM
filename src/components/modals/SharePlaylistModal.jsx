@@ -5,7 +5,54 @@ import { X, Copy, Check, Share2, Link as LinkIcon } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 /**
- * Modal para compartir playlist
+ * COMPONENTE: SharePlaylistModal - Modal para compartir playlists
+ * =================================================================
+ * Modal que genera un enlace compartible de una playlist y permite
+ * copiarlo al portapapeles o usar la API nativa de compartir del navegador.
+ * Crea URLs con parámetros que contienen los IDs de las canciones.
+ *
+ * FUNCIONALIDAD:
+ * - Genera URL compartible con todos los IDs de las canciones de la playlist
+ * - Muestra botón de copiar al portapapeles con feedback visual
+ * - Botón de compartir nativo (si el navegador lo soporta)
+ * - Fallback a copiar si navigator.share no está disponible
+ * - Muestra información de la playlist (nombre y número de canciones)
+ *
+ * ARQUITECTURA:
+ * - Modal centrado con overlay oscuro y blur
+ * - Estado local solo para feedback de "copiado"
+ * - Genera URL dinámicamente basada en window.location.origin
+ * - URL formato: /shared-playlist?tracks=id1,id2,id3&name=PlaylistName
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo del estado de "copiado" para feedback visual
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (X, Copy, Check, Share2, Link)
+ *
+ * REFERENCIAS:
+ * - Importa Button desde @/components/ui/Button (src/components/ui/Button.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/components/modals/PlaylistModal.jsx (botón compartir en playlists del usuario)
+ * - src/components/playlist/PlaylistDisplay.jsx (compartir playlists generadas)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.playlist - Array de objetos track con sus IDs
+ * @param {string} props.playlistName - Nombre de la playlist a compartir
+ * @param {Function} props.onClose - Callback para cerrar el modal
+ *
+ * @returns {JSX.Element} Modal con opciones de compartir
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. generateShareUrl() crea URL con trackIds y nombre codificados
+ * 2. Usuario puede:
+ *    a) Clic en "Copy": copia URL al portapapeles, muestra "Copied!" por 2 seg
+ *    b) Clic en "Share": usa navigator.share si disponible, sino copia
+ * 3. URL generada puede abrirse en otra sesión para ver la playlist compartida
+ *
+ * EJEMPLO DE URL GENERADA:
+ * https://example.com/shared-playlist?tracks=abc123,def456,ghi789&name=My%20Playlist
  */
 export default function SharePlaylistModal({ playlist, playlistName, onClose }) {
   const [copied, setCopied] = useState(false);

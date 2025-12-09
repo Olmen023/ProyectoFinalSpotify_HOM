@@ -25,7 +25,18 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 /**
- * Componente de track sortable
+ * COMPONENTE AUXILIAR: SortableTrack
+ * ===================================
+ * Componente individual de track con capacidad de drag & drop.
+ * Usa @dnd-kit para hacer cada canción reordenable dentro de la playlist.
+ * Muestra información completa del track en formato tabla.
+ *
+ * @param {Object} props
+ * @param {Object} props.track - Objeto completo de la canción
+ * @param {number} props.index - Índice del track en la playlist (para mostrar #)
+ * @param {string} props.addedAt - Fecha ISO cuando se añadió el track
+ * @param {Function} props.onRemove - Callback para eliminar track (recibe URI)
+ * @param {Function} props.onAddToPlaylist - Callback para añadir a otra playlist
  */
 function SortableTrack({ track, index, addedAt, onRemove, onAddToPlaylist }) {
   const {
@@ -154,7 +165,74 @@ function SortableTrack({ track, index, addedAt, onRemove, onAddToPlaylist }) {
 }
 
 /**
- * Modal para ver detalles de una playlist y gestionar canciones
+ * COMPONENTE: PlaylistModal - Modal de gestión completa de playlists
+ * ====================================================================
+ * Modal full-screen que muestra todos los detalles de una playlist de Spotify
+ * y permite gestionarla completamente: ver canciones, reordenar, eliminar,
+ * compartir, añadir a otras playlists y eliminar la playlist completa.
+ *
+ * FUNCIONALIDAD:
+ * - Carga y muestra detalles completos de la playlist desde Spotify API
+ * - Lista completa de canciones con información detallada (cover, título, artista, álbum, fecha, duración)
+ * - Drag & Drop para reordenar canciones dentro de la playlist
+ * - Reproducir preview de cada canción con integración al AudioPlayer
+ * - Eliminar canciones individuales de la playlist
+ * - Añadir canciones a otras playlists (abre AddToPlaylistModal)
+ * - Compartir playlist completa (abre SharePlaylistModal)
+ * - Eliminar playlist completa con confirmación
+ * - Muestra estadísticas: total de canciones, duración total
+ *
+ * ARQUITECTURA:
+ * - Modal de tamaño grande (max-w-4xl) con scroll interno
+ * - Header con gradient y cover de playlist estilo Spotify
+ * - Tabla de canciones con formato desktop/mobile responsive
+ * - Sistema de drag & drop con @dnd-kit para reordenar tracks
+ * - Sub-modals anidados (AddToPlaylist y SharePlaylist)
+ * - Integración con contexto de AudioPlayer para reproducción
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Múltiples estados (playlist, tracks, modals, loading)
+ * - useEffect: Carga inicial de datos de la playlist
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos diversos (X, Play, Pause, Clock, Music, Plus, Trash2, GripVertical, Share2)
+ * - @dnd-kit/core: Sistema de drag & drop (DndContext, sensors)
+ * - @dnd-kit/sortable: Componentes sortables (SortableContext, useSortable, arrayMove)
+ * - @dnd-kit/utilities: Utilidades CSS para transformaciones
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ * - Importa AddToPlaylistModal desde ./AddToPlaylistModal (src/components/modals/AddToPlaylistModal.jsx)
+ * - Importa SharePlaylistModal desde ./SharePlaylistModal (src/components/modals/SharePlaylistModal.jsx)
+ * - Importa useAudioPlayerContext desde @/contexts/AudioPlayerContext (src/contexts/AudioPlayerContext.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/playlists/page.jsx (al hacer clic en una playlist del usuario)
+ * - Cualquier componente que necesite mostrar detalles completos de una playlist
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {string} props.playlistId - ID de la playlist de Spotify a mostrar
+ * @param {Function} props.onClose - Callback para cerrar el modal
+ *
+ * @returns {JSX.Element|null} Modal de playlist o null si no hay playlistId
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Al montar con playlistId:
+ *    - Llama a getPlaylistDetails(playlistId) para info básica
+ *    - Llama a getPlaylistTracks(playlistId) para obtener canciones
+ * 2. Renderiza header con cover, nombre, owner, estadísticas
+ * 3. Muestra tabla de canciones con capacidad de drag & drop:
+ *    - Cada track es un SortableTrack component
+ *    - Usuario puede arrastrar para reordenar
+ *    - Botones de reproducir, añadir a otra playlist, eliminar
+ * 4. Botones de acción en header:
+ *    - Share: abre SharePlaylistModal con lista de tracks
+ *    - Delete: confirma y elimina la playlist completa, recarga página
+ *    - Close: cierra el modal
+ * 5. Al hacer drag & drop:
+ *    - handleDragEnd actualiza orden localmente con arrayMove
+ *    - Podría sincronizar con Spotify API si se implementa
  */
 export default function PlaylistModal({ playlistId, onClose }) {
   const { getPlaylistDetails, getPlaylistTracks, removeTrackFromPlaylist, deletePlaylist } = useSpotify();

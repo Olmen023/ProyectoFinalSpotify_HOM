@@ -6,8 +6,57 @@ import { useSpotify } from '@/hooks/useSpotify';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
- * Widget para seleccionar géneros musicales
- * Máximo 5 géneros seleccionados
+ * COMPONENTE: GenreWidget - Selector de géneros musicales
+ * ========================================================
+ * Widget para seleccionar géneros musicales de la lista oficial
+ * de géneros disponibles en Spotify API. Permite hasta 5 géneros.
+ *
+ * FUNCIONALIDAD:
+ * - Carga lista completa de géneros desde Spotify API al montar
+ * - Búsqueda/filtrado local de géneros en tiempo real
+ * - Grid responsive de chips de géneros (2-3 columnas)
+ * - Permite seleccionar hasta 5 géneros máximo
+ * - Chips seleccionados mostrados arriba con opción de eliminar
+ * - Deshabilita géneros no seleccionados cuando alcanza el límite
+ * - Capitalización automática de nombres de géneros
+ *
+ * ARQUITECTURA:
+ * - Carga inicial de géneros con useEffect
+ * - Estado local para todos los géneros y filtrado
+ * - Filtrado local (no API) para búsqueda instantánea
+ * - Grid scrollable con max-height (300px)
+ * - Validación de límite MAX_GENRES (5)
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de géneros (all, filtered) y query
+ * - useEffect: Carga inicial de géneros y filtrado
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (Search, X)
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (selector de géneros para playlist)
+ * - src/app/page.jsx (página principal con generador)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.selectedGenres - Array de géneros seleccionados (strings)
+ * @param {Function} props.onSelect - Callback con array actualizado de géneros
+ *
+ * @returns {JSX.Element} Widget de selección de géneros
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Al montar: llama a getGenres() para cargar lista completa
+ * 2. Usuario puede buscar/filtrar géneros escribiendo en input
+ * 3. useEffect filtra géneros localmente según searchQuery
+ * 4. Al hacer clic en género:
+ *    - Si ya está seleccionado: lo elimina
+ *    - Si no está seleccionado y no excede límite: lo añade
+ *    - Llama a onSelect con array actualizado
+ * 5. Chips de géneros seleccionados mostrados arriba con botón X
  */
 export default function GenreWidget({ selectedGenres = [], onSelect }) {
   const { getGenres, loading } = useSpotify();

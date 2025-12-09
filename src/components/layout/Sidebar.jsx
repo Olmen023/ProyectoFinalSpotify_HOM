@@ -1,3 +1,53 @@
+/**
+ * COMPONENTE: SIDEBAR - BARRA LATERAL DE NAVEGACIÓN
+ * ===================================================
+ * Componente de barra lateral que contiene el logo de la aplicación, menú de navegación,
+ * botón para crear playlists y lista de playlists del usuario.
+ *
+ * FUNCIONALIDAD:
+ * - Logo y nombre de la aplicación (MusicStream)
+ * - Navegación principal: Home, Generate Playlist, Explore, Library, Liked Songs
+ * - Botón para crear nuevas playlists (abre modal)
+ * - Lista de playlists (actualmente hardcodeada)
+ * - Resaltado visual de la ruta activa
+ *
+ * ARQUITECTURA:
+ * - Estado local: isModalOpen (control del modal), user (perfil del usuario)
+ * - Navegación: pathname para detectar ruta activa, router para redirección
+ * - API: Carga perfil de usuario y crea playlists usando useSpotify()
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState, useEffect: Manejo de estado y efectos secundarios
+ *
+ * DEPENDENCIAS DE NEXT.JS:
+ * - Link: Navegación declarativa entre rutas
+ * - usePathname, useRouter: Hooks de navegación
+ *
+ * DEPENDENCIAS DE LUCIDE:
+ * - Music, Home, Compass, Heart, PlusCircle, Library, Sparkles: Iconos del menú
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa CreatePlaylistModal desde @/components/ui/CreatePlaylistModal (src/components/ui/CreatePlaylistModal.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/layout.js (layout principal de la aplicación)
+ *
+ * FLUJO DE CREACIÓN DE PLAYLIST:
+ * 1. Usuario hace clic en "Create Playlist"
+ * 2. Se abre el modal CreatePlaylistModal
+ * 3. Usuario ingresa nombre, descripción y visibilidad
+ * 4. handleCreatePlaylist() llama a createPlaylist() de useSpotify
+ * 5. Si éxito: cierra modal y redirige a /dashboard/library
+ * 6. Refresh de la página para mostrar la nueva playlist
+ *
+ * MEJORA FUTURA:
+ * - La lista de playlists está hardcodeada. Debería cargar las playlists reales
+ *   del usuario usando getUserPlaylists() de useSpotify.
+ *
+ * @returns {JSX.Element} - Barra lateral de navegación
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,10 +56,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSpotify } from '@/hooks/useSpotify';
 import CreatePlaylistModal from '@/components/ui/CreatePlaylistModal';
-
-/**
- * Barra lateral de navegación con logo, menú y playlists
- */
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();

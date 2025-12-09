@@ -8,8 +8,62 @@ import TopBar from '@/components/layout/TopBar';
 import { useSpotify } from '@/hooks/useSpotify';
 
 /**
- * Dashboard principal de MusicStream
- * Página de inicio con acceso rápido a las diferentes secciones
+ * PÁGINA: DASHBOARD PRINCIPAL - HOME DE LA APLICACIÓN
+ * =====================================================
+ * Página principal del dashboard que sirve como punto de entrada después del login.
+ * Muestra un resumen personalizado del usuario con acceso rápido a las funciones principales.
+ *
+ * FUNCIONALIDAD:
+ * - Mensaje de bienvenida personalizado con nombre del usuario
+ * - 4 tarjetas de acceso rápido a secciones principales
+ * - Top 5 canciones del usuario con imágenes y artistas
+ * - Top 5 artistas del usuario con fotos y géneros
+ * - Diseño responsive con grid adaptativo
+ *
+ * ARQUITECTURA:
+ * - Client Component (usa hooks de React y Next.js)
+ * - Estado local para: user, topTracks, topArtists
+ * - Carga de datos inicial con useEffect
+ * - Navegación programática con useRouter
+ *
+ * SECCIONES DE ACCESO RÁPIDO:
+ * 1. Generate Playlist - Crear playlists personalizadas
+ * 2. Explore - Descubrir nueva música
+ * 3. Favorites - Canciones y álbumes favoritos
+ * 4. Library - Biblioteca personal (playlists, artistas, álbumes)
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Estado local del componente
+ * - useEffect: Carga de datos al montar
+ *
+ * DEPENDENCIAS DE NEXT.JS:
+ * - useRouter: Navegación entre páginas
+ *
+ * DEPENDENCIAS DE LUCIDE:
+ * - Sparkles, Music, Heart, Library, TrendingUp: Iconos de la UI
+ *
+ * REFERENCIAS:
+ * - Importa Sidebar desde @/components/layout/Sidebar (src/components/layout/Sidebar.jsx)
+ * - Importa TopBar desde @/components/layout/TopBar (src/components/layout/TopBar.jsx)
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ *
+ * UTILIZADO EN:
+ * - Ruta: /dashboard
+ * - Primera página después del login exitoso
+ *
+ * FLUJO DE CARGA:
+ * 1. Usuario accede a /dashboard
+ * 2. useEffect se ejecuta al montar
+ * 3. Carga perfil del usuario (getUserProfile)
+ * 4. Carga top 5 tracks (getUserTopTracks)
+ * 5. Carga top 5 artists (getUserTopArtists)
+ * 6. Renderiza UI con datos cargados
+ *
+ * DATOS MOSTRADOS:
+ * - Top Tracks: Ranking 1-5 con imagen, nombre y artistas
+ * - Top Artists: Ranking 1-5 con foto, nombre y género principal
+ *
+ * @returns {JSX.Element} - Página de dashboard con acceso rápido y estadísticas
  */
 export default function DashboardPage() {
   const router = useRouter();

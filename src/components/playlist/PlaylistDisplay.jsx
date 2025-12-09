@@ -25,7 +25,16 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 /**
- * Componente de item sortable
+ * COMPONENTE AUXILIAR: SortableTrackItem
+ * =======================================
+ * Wrapper que hace un TrackCard draggable con @dnd-kit.
+ * Agrega el icono de drag handle y el número de track.
+ *
+ * @param {Object} props
+ * @param {Object} props.track - Objeto de canción
+ * @param {number} props.index - Posición en la playlist
+ * @param {Function} props.onRemove - Callback para eliminar
+ * @param {Function} props.onAddToPlaylist - Callback para añadir a otra playlist
  */
 function SortableTrackItem({ track, index, onRemove, onAddToPlaylist }) {
   const {
@@ -77,8 +86,74 @@ function SortableTrackItem({ track, index, onRemove, onAddToPlaylist }) {
 }
 
 /**
- * Componente principal para visualizar y gestionar playlist generada
- * Incluye funcionalidades: eliminar tracks, favoritos, refrescar, añadir más, drag & drop
+ * COMPONENTE: PlaylistDisplay - Visualizador de playlist generada
+ * ================================================================
+ * Componente principal para mostrar y gestionar una playlist generada
+ * por el sistema de recomendaciones. Permite editar el nombre, reordenar
+ * canciones, eliminar tracks, compartir, y guardar a Spotify.
+ *
+ * FUNCIONALIDAD:
+ * - Muestra lista completa de canciones generadas con información visual
+ * - Editor inline del nombre de la playlist
+ * - Estadísticas: número de canciones y duración total
+ * - Botones de acción: Refresh, Add More, Share, Save to Spotify
+ * - Drag & Drop para reordenar canciones
+ * - Eliminar canciones individuales
+ * - Añadir canciones a playlists de Spotify (abre modal)
+ * - Compartir playlist completa (abre modal)
+ * - Estados de carga y vacío con mensajes informativos
+ *
+ * ARQUITECTURA:
+ * - Componente stateful con estados locales para nombre y modales
+ * - Sincroniza playlist local con prop externa mediante useEffect
+ * - Sistema de drag & drop con @dnd-kit
+ * - Header con tabla estilo Spotify (desktop) y cards (mobile)
+ * - Sub-componentes: SortableTrackItem, TrackCard, modales
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de nombre, modales, y playlist local
+ * - useEffect: Sincronización de playlist prop con estado local
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (RefreshCw, Plus, Save, Download, GripVertical, Share2)
+ * - @dnd-kit/core: Sistema de drag & drop
+ * - @dnd-kit/sortable: Componentes sortables y utilidades
+ *
+ * REFERENCIAS:
+ * - Importa TrackCard desde ./TrackCard (src/components/playlist/TrackCard.jsx)
+ * - Importa Button desde @/components/ui/Button (src/components/ui/Button.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ * - Importa AddToPlaylistModal desde @/components/modals/AddToPlaylistModal (src/components/modals/AddToPlaylistModal.jsx)
+ * - Importa SharePlaylistModal desde @/components/modals/SharePlaylistModal (src/components/modals/SharePlaylistModal.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (muestra playlist generada por recomendaciones)
+ * - src/app/page.jsx (página principal con generador de playlists)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.playlist - Array de objetos track generados
+ * @param {Function} props.onRemoveTrack - Callback al eliminar track (recibe trackId)
+ * @param {Function} props.onRefresh - Callback para regenerar playlist completa
+ * @param {Function} props.onAddMore - Callback para añadir más canciones similares
+ * @param {Function} props.onSaveToSpotify - Callback para guardar en Spotify
+ * @param {Function} props.onReorderTracks - Callback con nuevo orden de tracks
+ * @param {boolean} props.loading - Estado de carga durante generación
+ *
+ * @returns {JSX.Element} Display de playlist con controles
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Recibe playlist como prop y la sincroniza con estado local
+ * 2. Si loading=true, muestra LoadingSpinner
+ * 3. Si playlist vacía, muestra mensaje "No playlist generated yet"
+ * 4. Si tiene canciones:
+ *    - Muestra input editable para nombre de playlist
+ *    - Calcula y muestra estadísticas (canciones, duración)
+ *    - Renderiza botones de acción
+ *    - Muestra lista de tracks con drag & drop habilitado
+ * 5. Al reordenar:
+ *    - handleDragEnd actualiza orden local con arrayMove
+ *    - Llama a onReorderTracks con nuevo orden
+ * 6. Modales se abren/cierran según estado local
  */
 export default function PlaylistDisplay({
   playlist = [],

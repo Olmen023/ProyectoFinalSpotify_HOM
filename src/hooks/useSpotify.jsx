@@ -1,16 +1,120 @@
+/**
+ * HOOK: USE SPOTIFY - INTERFAZ COMPLETA CON SPOTIFY WEB API
+ * ===========================================================
+ * Hook principal y más completo para interactuar con la Spotify Web API.
+ * Proporciona métodos para búsqueda, obtención de datos del usuario, gestión de playlists,
+ * generación de recomendaciones y gestión de favoritos.
+ *
+ * FUNCIONALIDADES PRINCIPALES:
+ * 1. BÚSQUEDA: Artistas, canciones, géneros
+ * 2. PERFIL DE USUARIO: Datos personales, top tracks, top artists
+ * 3. BIBLIOTECA: Playlists, álbumes guardados, canciones favoritas
+ * 4. GESTIÓN DE PLAYLISTS: Crear, eliminar, agregar/quitar canciones, reordenar
+ * 5. GENERACIÓN: Crear playlists basadas en preferencias (Recommendations API)
+ * 6. FAVORITOS: Guardar y eliminar canciones favoritas
+ *
+ * ARQUITECTURA:
+ * - Estado global: loading (boolean), error (string|null)
+ * - Función central: spotifyFetch() - wrapper para todas las llamadas a la API
+ * - Funciones especializadas: Una para cada endpoint o grupo de endpoints
+ * - Memoización: Usa useCallback para optimizar rendimiento
+ *
+ * MANEJO DE ERRORES:
+ * - 401 (Unauthorized): Token expirado, requiere re-login
+ * - 403 (Forbidden): Permisos insuficientes
+ * - Otros: Error genérico con código de estado
+ *
+ * UTILIZADO EN:
+ * - src/app/dashboard/explore/ExploreClient.jsx (explorar música)
+ * - src/app/dashboard/library/LibraryClient.jsx (biblioteca del usuario)
+ * - src/app/dashboard/generate-playlist/page.jsx (generar playlists)
+ * - src/components/widgets/*.jsx (todos los widgets de búsqueda)
+ * - src/components/modals/*.jsx (modales de playlist)
+ *
+ * REFERENCIAS:
+ * - Importa getAccessToken desde @/lib/auth (src/lib/auth.js)
+ *
+ * ENDPOINTS DE SPOTIFY UTILIZADOS:
+ * - /search (búsqueda de artistas, tracks)
+ * - /me/* (perfil, top tracks/artists, playlists, saved tracks/albums)
+ * - /playlists/* (detalles, tracks, crear, modificar, eliminar)
+ * - /recommendations (generar recomendaciones personalizadas)
+ * - /tracks (obtener múltiples tracks por IDs, guardar/eliminar favoritos)
+ * - /artists/* (top tracks de un artista)
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Estados de loading y error
+ * - useCallback: Memoización de todas las funciones
+ */
+
 'use client';
 
 import { useState, useCallback } from 'react';
 import { getAccessToken } from '@/lib/auth';
 
 /**
- * Hook principal para interactuar con la Spotify Web API
- * Proporciona métodos para búsqueda, recomendaciones y gestión de playlists
+ * useSpotify - Hook principal para interactuar con Spotify Web API
+ *
+ * ESTADO INTERNO:
+ * - loading: boolean - Indica si hay una operación en curso
+ * - error: string|null - Mensaje de error de la última operación fallida
+ *
+ * FUNCIONES RETORNADAS:
+ * Ver documentación individual de cada función más abajo.
+ * Total: 20+ funciones para diferentes operaciones de Spotify.
+ *
+ * @returns {Object} - Objeto con propiedades:
+ *   - loading: boolean
+ *   - error: string|null
+ *   - searchArtists(query): Promise<Array> - Buscar artistas
+ *   - searchTracks(query): Promise<Array> - Buscar canciones
+ *   - getGenres(): Promise<Array> - Obtener lista de géneros
+ *   - getUserProfile(): Promise<Object> - Datos del perfil de usuario
+ *   - getUserTopTracks(limit, timeRange): Promise<Array>
+ *   - getUserTopArtists(limit, timeRange): Promise<Array>
+ *   - getUserPlaylists(limit): Promise<Array>
+ *   - getUserSavedAlbums(limit): Promise<Array>
+ *   - getUserSavedTracks(limit): Promise<Array>
+ *   - getPlaylistTracks(playlistId): Promise<Array>
+ *   - getPlaylistDetails(playlistId): Promise<Object>
+ *   - createPlaylist(name, description, isPublic): Promise<Object>
+ *   - addTracksToPlaylist(playlistId, trackUris): Promise<Object>
+ *   - removeTrackFromPlaylist(playlistId, trackUri): Promise<Object>
+ *   - deletePlaylist(playlistId): Promise<boolean>
+ *   - generatePlaylist(preferences): Promise<Array>
+ *   - saveTrack(trackId): Promise<boolean>
+ *   - removeTrack(trackId): Promise<boolean>
+ *   - checkSavedTracks(trackIds): Promise<Array<boolean>>
+ *   - getTracksByIds(trackIds): Promise<Array>
  */
 export function useSpotify() {
+  // ESTADO: Loading indica si hay una operación en curso
   const [loading, setLoading] = useState(false);
+  // ESTADO: Error guarda el mensaje de error de la última operación fallida
   const [error, setError] = useState(null);
 
+  /**
+   * spotifyFetch - Función wrapper centralizada para todas las llamadas a Spotify API
+   *
+   * PROPÓSITO:
+   * Centraliza la lógica de autenticación y manejo de errores para todas
+   * las llamadas a la API de Spotify. Todas las demás funciones usan esta.
+   *
+   * FLUJO:
+   * 1. Obtiene el token de acceso
+   * 2. Hace fetch a la API de Spotify con el token en headers
+   * 3. Maneja errores comunes (401, 403, otros)
+   * 4. Retorna los datos parseados como JSON
+   *
+   * MANEJO DE ERRORES:
+   * - 401: Token expirado, requiere nuevo login
+   * - 403: Permisos insuficientes (scopes faltantes)
+   * - Otros: Error genérico con código de estado
+   *
+   * @param {string} endpoint - Endpoint de la API (sin el prefijo /v1, ej: '/me/playlists')
+   * @returns {Promise<Object>} - Datos JSON de la respuesta
+   * @throws {Error} - Si no hay token, si la API devuelve error, o problemas de red
+   */
   const spotifyFetch = useCallback(async (endpoint) => {
     const token = getAccessToken();
     if (!token) throw new Error('No token available');
@@ -21,18 +125,35 @@ export function useSpotify() {
 
     if (!response.ok) {
       if (response.status === 401) {
-        // Token expirado - aquí podrías implementar refresh
+        // Token expirado - el usuario necesita volver a hacer login
         throw new Error('Token expired. Please login again.');
       }
       if (response.status === 403) {
+        // Permisos insuficientes - faltan scopes en la autenticación
         throw new Error('Permission denied. Please re-authenticate with required permissions.');
       }
+      // Otro tipo de error de API
       throw new Error(`API Error: ${response.status}`);
     }
 
     return response.json();
   }, []);
 
+  /**
+   * searchArtists - Busca artistas en Spotify por término de búsqueda
+   *
+   * ENDPOINT: GET /search?type=artist&q={query}&limit=10
+   *
+   * @param {string} query - Término de búsqueda (nombre del artista)
+   * @returns {Promise<Array>} - Array de hasta 10 objetos artista con propiedades:
+   *   - id: string - ID del artista
+   *   - name: string - Nombre del artista
+   *   - images: Array - Imágenes del artista
+   *   - genres: Array - Géneros del artista
+   *   - popularity: number - Popularidad (0-100)
+   *
+   * UTILIZADO EN: src/components/widgets/ArtistWidget.jsx
+   */
   const searchArtists = useCallback(async (query) => {
     if (!query || query.trim().length === 0) return [];
 
@@ -49,6 +170,16 @@ export function useSpotify() {
     }
   }, [spotifyFetch]);
 
+  /**
+   * searchTracks - Busca canciones en Spotify por término de búsqueda
+   *
+   * ENDPOINT: GET /search?type=track&q={query}&limit=20
+   *
+   * @param {string} query - Término de búsqueda (nombre de canción, artista, etc.)
+   * @returns {Promise<Array>} - Array de hasta 20 objetos track
+   *
+   * UTILIZADO EN: src/components/widgets/TrackWidget.jsx
+   */
   const searchTracks = useCallback(async (query) => {
     if (!query || query.trim().length === 0) return [];
 
@@ -65,6 +196,20 @@ export function useSpotify() {
     }
   }, [spotifyFetch]);
 
+  /**
+   * getGenres - Obtiene la lista de géneros disponibles para recomendaciones
+   *
+   * IMPLEMENTACIÓN:
+   * Usa una lista hardcodeada en lugar del endpoint de Spotify porque
+   * /recommendations/available-genre-seeds devuelve 404 inconsistentemente.
+   * La lista incluye todos los géneros válidos para el Recommendations API.
+   *
+   * NOTA: Esta lista es oficial de Spotify y raramente cambia.
+   *
+   * @returns {Promise<Array<string>>} - Array de strings con nombres de géneros
+   *
+   * UTILIZADO EN: src/components/widgets/GenreWidget.jsx
+   */
   const getGenres = useCallback(async () => {
     // Usar lista hardcodeada de géneros populares en lugar del endpoint problemático
     // El endpoint /recommendations/available-genre-seeds devuelve 404 inconsistentemente

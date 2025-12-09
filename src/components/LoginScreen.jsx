@@ -5,8 +5,60 @@ import { useState } from 'react';
 import { getSpotifyAuthUrl } from '@/lib/auth';
 
 /**
- * Pantalla de Login Pixel-Perfect
- * Implementa autenticación con Spotify OAuth siguiendo las especificaciones de diseño exactas
+ * COMPONENTE: LoginScreen - Pantalla de autenticación principal
+ * ==============================================================
+ * Pantalla de login de la aplicación con diseño pixel-perfect.
+ * Implementa autenticación OAuth con Spotify. El formulario
+ * email/password es decorativo; la autenticación real es OAuth.
+ *
+ * FUNCIONALIDAD:
+ * - Formulario decorativo de email/contraseña (no funcional)
+ * - Botón principal que redirige a Spotify OAuth
+ * - Botón "Continue with Spotify" como método principal de login
+ * - Estados de carga durante el proceso de autenticación
+ * - Enlaces decorativos: "Forgot Password", "Sign Up", Terms, Privacy
+ * - Logo y branding de la aplicación
+ * - Diseño responsive centrado verticalmente
+ *
+ * ARQUITECTURA:
+ * - Componente standalone full-screen (no requiere layout)
+ * - Estados locales para campos del formulario (decorativos)
+ * - Estado loading para feedback visual durante OAuth
+ * - Redirección a Spotify OAuth mediante getSpotifyAuthUrl()
+ * - Fondo negro con card centrada
+ * - Logo de Spotify SVG inline
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de campos del formulario y loading state
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Icono Music para logo de la app
+ *
+ * REFERENCIAS:
+ * - Importa getSpotifyAuthUrl desde @/lib/auth (src/lib/auth.js)
+ *
+ * UTILIZADO EN:
+ * - src/app/page.jsx (si usuario no autenticado)
+ * - src/app/login/page.jsx (ruta dedicada de login)
+ *
+ * @returns {JSX.Element} Pantalla de login completa
+ *
+ * FLUJO DE AUTENTICACIÓN:
+ * 1. Usuario ve pantalla de login con opciones
+ * 2. Puede llenar formulario decorativo (no hace nada)
+ * 3. Al hacer clic en cualquier botón de login:
+ *    - Activa estado loading
+ *    - Llama a getSpotifyAuthUrl() para obtener URL OAuth
+ *    - Redirige a Spotify para autorización
+ * 4. Spotify redirige de vuelta a /callback con código
+ * 5. /callback procesa token y establece sesión
+ * 6. Usuario es redirigido a la app autenticado
+ *
+ * NOTAS DE DISEÑO:
+ * - Sigue guías de diseño de Spotify (colores, espaciado)
+ * - Verde oficial de Spotify: #1DB954
+ * - Formulario decorativo para UI/UX, pero OAuth es el único método real
+ * - Botón de Spotify prominente como CTA principal
  */
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

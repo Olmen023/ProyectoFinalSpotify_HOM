@@ -4,8 +4,62 @@ import { useState } from 'react';
 import { TrendingUp, Music, Radio } from 'lucide-react';
 
 /**
- * Widget para seleccionar rango de popularidad de canciones
- * Mainstream (80-100), Popular (50-80), Underground (0-50)
+ * COMPONENTE: PopularityWidget - Selector de popularidad de canciones
+ * ====================================================================
+ * Widget para filtrar canciones por su nivel de popularidad en Spotify.
+ * Ofrece rangos predefinidos (Mainstream, Popular, Underground) y
+ * opción de rango personalizado con sliders.
+ *
+ * FUNCIONALIDAD:
+ * - 4 rangos predefinidos de popularidad (0-100):
+ *   * All: sin filtro (0-100)
+ *   * Mainstream: muy populares (80-100) - Chart-toppers
+ *   * Popular: conocidas (50-80) - Well-known
+ *   * Underground: nicho (0-50) - Hidden gems
+ * - Sliders personalizados para min/max
+ * - Solo uno puede estar activo a la vez
+ * - Seleccionar preset o mover slider actualiza el rango
+ * - Iconos descriptivos para cada nivel
+ *
+ * ARQUITECTURA:
+ * - Estado local para rango seleccionado y valores custom
+ * - Inicializa con valores de prop popularity o defaults
+ * - Grid de botones para presets (2 columnas)
+ * - Sección separada para sliders custom
+ * - Al mover sliders, se selecciona automáticamente modo 'custom'
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de rango seleccionado y valores custom
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (TrendingUp, Music, Radio)
+ *
+ * REFERENCIAS:
+ * - No importa otros componentes
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (filtrar por popularidad)
+ * - src/app/page.jsx (página principal con generador)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Object} props.popularity - Objeto inicial {range, min, max}
+ * @param {Function} props.onSelect - Callback con objeto actualizado {range, min, max}
+ *
+ * @returns {JSX.Element} Widget de selección de popularidad
+ *
+ * RANGOS PREDEFINIDOS:
+ * - all: 0-100 (sin filtro)
+ * - mainstream: 80-100 (muy popular)
+ * - popular: 50-80 (conocido)
+ * - underground: 0-50 (nicho/descubrir)
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Inicializa con values de prop o defaults
+ * 2. Usuario puede:
+ *    a) Click en preset: aplica min/max predefinidos
+ *    b) Mover sliders: activa modo 'custom' con valores personalizados
+ * 3. Cada cambio llama a onSelect({range, min, max})
+ * 4. Valores se usan en Spotify API para filtrar por popularidad
  */
 export default function PopularityWidget({ popularity = {}, onSelect }) {
   const [selectedRange, setSelectedRange] = useState(

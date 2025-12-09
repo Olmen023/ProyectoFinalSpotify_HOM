@@ -7,8 +7,61 @@ import { useDebounce } from '@/hooks/useDebounce';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
- * Widget para buscar y seleccionar canciones
- * Selección múltiple sin límite estricto (pero recomendado max 10)
+ * COMPONENTE: TrackWidget - Selector de canciones para recomendaciones
+ * =====================================================================
+ * Widget de búsqueda y selección de canciones desde Spotify.
+ * Similar a ArtistWidget pero para tracks. Permite seleccionar múltiples
+ * canciones como semillas para el algoritmo de recomendaciones.
+ *
+ * FUNCIONALIDAD:
+ * - Búsqueda de canciones en tiempo real con debounce (300ms)
+ * - Muestra resultados con cover, nombre, artista y duración
+ * - Selección múltiple sin límite estricto (recomendado max 10)
+ * - Lista scrollable de tracks seleccionados (max-height: 200px)
+ * - Opción de eliminar tracks seleccionados
+ * - Validación para no añadir duplicados
+ * - Limpia búsqueda automáticamente al seleccionar
+ *
+ * ARQUITECTURA:
+ * - Estado local para query y resultados de búsqueda
+ * - useDebounce para optimizar llamadas a la API (300ms)
+ * - useEffect que ejecuta búsqueda cuando cambia query debounced
+ * - Lista de seleccionados con scroll independiente
+ * - Formateo de duración de canciones (ms a mm:ss)
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de query y resultados de búsqueda
+ * - useEffect: Trigger de búsqueda cuando cambia query debounced
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (Search, X, Music)
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa useDebounce desde @/hooks/useDebounce (src/hooks/useDebounce.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (selector de tracks semilla para playlist)
+ * - src/app/page.jsx (página principal con generador)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.selectedTracks - Array de tracks ya seleccionados
+ * @param {Function} props.onSelect - Callback con array actualizado de tracks
+ *
+ * @returns {JSX.Element} Widget de selección de canciones
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Usuario escribe en input de búsqueda
+ * 2. useDebounce espera 300ms sin cambios
+ * 3. useEffect detecta cambio en debouncedQuery
+ * 4. Llama a searchTracks(query) del hook useSpotify
+ * 5. Muestra resultados con cover, info y duración
+ * 6. Al hacer clic en track:
+ *    - Valida que no esté ya seleccionado
+ *    - Añade a selectedTracks y llama a onSelect
+ *    - Limpia búsqueda y resultados
+ * 7. Al eliminar track: filtra array y llama a onSelect
  */
 export default function TrackWidget({ selectedTracks = [], onSelect }) {
   const { searchTracks, loading } = useSpotify();

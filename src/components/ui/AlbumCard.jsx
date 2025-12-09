@@ -3,7 +3,65 @@
 import { Play, Plus } from 'lucide-react';
 
 /**
- * Tarjeta de álbum/artista con efecto hover y botón play
+ * COMPONENTE: AlbumCard - Tarjeta visual de álbum/artista/track
+ * ==============================================================
+ * Componente de tarjeta genérico que muestra contenido musical (álbum, artista, o track)
+ * con imagen, título, subtítulo y botones de acción que aparecen en hover.
+ * Usado principalmente para mostrar resultados de búsqueda y recomendaciones.
+ *
+ * FUNCIONALIDAD:
+ * - Muestra imagen cuadrada con efecto zoom en hover
+ * - Título y subtítulo truncados si son muy largos
+ * - Botones de Play y Add que aparecen en hover con animaciones
+ * - Soporte para props antiguas y nuevas (retrocompatibilidad)
+ * - Click en toda la card ejecuta acción principal (o añadir a playlist)
+ * - Imagen placeholder si no hay cover disponible
+ *
+ * ARQUITECTURA:
+ * - Componente presentacional sin estado
+ * - Estilos con Tailwind y efectos CSS (hover, scale, opacity)
+ * - Fallback de props para compatibilidad con código antiguo
+ * - Card clickeable completa con stopPropagation en botones internos
+ *
+ * DEPENDENCIAS DE REACT:
+ * - Ninguna (componente puramente presentacional)
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (Play, Plus)
+ *
+ * REFERENCIAS:
+ * - No importa otros componentes locales
+ *
+ * UTILIZADO EN:
+ * - src/app/search/page.jsx (mostrar resultados de búsqueda)
+ * - src/app/browse/page.jsx (mostrar álbumes y artistas)
+ * - src/components/widgets/* (mostrar recomendaciones en widgets)
+ * - Cualquier lugar que necesite mostrar contenido musical en formato card
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {string} props.id - ID del item (álbum, artista, o track)
+ * @param {string} props.name - Nombre del item (nueva prop, recomendada)
+ * @param {string} props.image - URL de la imagen del item (nueva prop)
+ * @param {string} props.artist - Nombre del artista o info secundaria (nueva prop)
+ * @param {string} props.type - Tipo de contenido: 'album', 'artist', 'track'
+ * @param {string} props.title - Título del item (prop antigua, fallback)
+ * @param {string} props.subtitle - Subtítulo del item (prop antigua, fallback)
+ * @param {Function} props.onClick - Callback al hacer clic en la card
+ * @param {Function} props.onPlayClick - Callback al hacer clic en botón Play
+ * @param {Function} props.onAddToPlaylist - Callback al añadir a playlist
+ * @param {boolean} props.showAddButton - Si muestra botón de añadir (default: false)
+ * @param {Object} props.track - Objeto track completo (para pasar a onAddToPlaylist)
+ *
+ * @returns {JSX.Element} Card de álbum/artista con hover effects
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Determina qué props usar (nuevas con fallback a antiguas)
+ * 2. Al hacer clic en la card:
+ *    - Si showAddButton=true y hay track: llama a onAddToPlaylist(track)
+ *    - Si no: llama a onClick() genérico
+ * 3. Al hacer hover: muestra botones con animación (opacity y translate)
+ * 4. Botón Play: ejecuta onPlayClick con stopPropagation
+ * 5. Botón Add: ejecuta onAddToPlaylist(track) con stopPropagation
  */
 export default function AlbumCard({
   id,

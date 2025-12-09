@@ -7,8 +7,61 @@ import { useDebounce } from '@/hooks/useDebounce';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 /**
- * Widget para buscar y seleccionar artistas
- * Máximo 5 artistas seleccionados
+ * COMPONENTE: ArtistWidget - Selector de artistas para recomendaciones
+ * =====================================================================
+ * Widget de búsqueda y selección de artistas desde Spotify.
+ * Permite al usuario seleccionar hasta 5 artistas para usarlos como
+ * semillas en el algoritmo de recomendaciones de playlists.
+ *
+ * FUNCIONALIDAD:
+ * - Búsqueda de artistas en tiempo real con debounce (300ms)
+ * - Muestra resultados con foto, nombre y número de followers
+ * - Permite seleccionar hasta 5 artistas máximo
+ * - Lista de artistas seleccionados con opción de eliminar
+ * - Deshabilita búsqueda cuando alcanza el límite
+ * - Validación para no añadir duplicados
+ *
+ * ARQUITECTURA:
+ * - Estado local para query y resultados de búsqueda
+ * - useDebounce para optimizar llamadas a la API
+ * - useEffect que ejecuta búsqueda cuando cambia query debounced
+ * - Input deshabilitado cuando se alcanza MAX_ARTISTS
+ * - Resultados con estados: normal, selected, disabled
+ *
+ * DEPENDENCIAS DE REACT:
+ * - useState: Manejo de query y resultados de búsqueda
+ * - useEffect: Trigger de búsqueda cuando cambia query debounced
+ *
+ * DEPENDENCIAS DE LIBRERÍAS:
+ * - lucide-react: Iconos (Search, X, User)
+ *
+ * REFERENCIAS:
+ * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
+ * - Importa useDebounce desde @/hooks/useDebounce (src/hooks/useDebounce.jsx)
+ * - Importa LoadingSpinner desde @/components/ui/LoadingSpinner (src/components/ui/LoadingSpinner.jsx)
+ *
+ * UTILIZADO EN:
+ * - src/app/generator/page.jsx (selector de artistas para generar playlist)
+ * - src/app/page.jsx (página principal con generador)
+ *
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.selectedArtists - Array de artistas ya seleccionados
+ * @param {Function} props.onSelect - Callback con array actualizado de artistas
+ *
+ * @returns {JSX.Element} Widget de selección de artistas
+ *
+ * FLUJO DE EJECUCIÓN:
+ * 1. Usuario escribe en input de búsqueda
+ * 2. useDebounce espera 300ms sin cambios
+ * 3. useEffect detecta cambio en debouncedQuery
+ * 4. Llama a searchArtists(query) del hook useSpotify
+ * 5. Muestra resultados con foto y stats
+ * 6. Al hacer clic en artista:
+ *    - Valida que no esté ya seleccionado
+ *    - Valida que no exceda MAX_ARTISTS (5)
+ *    - Añade a selectedArtists y llama a onSelect
+ *    - Limpia búsqueda
+ * 7. Al eliminar artista: filtra array y llama a onSelect
  */
 export default function ArtistWidget({ selectedArtists = [], onSelect }) {
   const { searchArtists, loading } = useSpotify();
