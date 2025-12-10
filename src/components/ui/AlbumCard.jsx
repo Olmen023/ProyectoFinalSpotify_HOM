@@ -110,8 +110,8 @@ export default function AlbumCard({
           alt={displayTitle}
           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Botones (aparecen en hover) */}
-        <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
+        {/* Botones (siempre visibles con opacidad reducida) */}
+        <div className="absolute bottom-2 right-2 flex gap-2 transition-all">
           {/* Botón Favorite (Heart) */}
           {showFavoriteButton && onToggleFavorite && (
             <div
@@ -120,12 +120,14 @@ export default function AlbumCard({
                 onToggleFavorite(track);
               }}
               className={`${
-                isFavorite ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-600 hover:bg-gray-500'
-              } rounded-full p-3 shadow-xl hover:scale-105 transition-all`}
+                isFavorite
+                  ? 'bg-red-600 hover:bg-red-500'
+                  : 'bg-gray-700/80 hover:bg-gray-600'
+              } rounded-full p-2.5 shadow-xl hover:scale-110 transition-all opacity-70 group-hover:opacity-100`}
               title={isFavorite ? 'Remove from Liked Songs' : 'Add to Liked Songs'}
             >
               <Heart
-                size={20}
+                size={18}
                 className={`text-white ${isFavorite ? 'fill-white' : ''}`}
               />
             </div>
@@ -137,10 +139,10 @@ export default function AlbumCard({
                 e.stopPropagation();
                 onAddToPlaylist(track);
               }}
-              className="bg-green-600 rounded-full p-3 shadow-xl hover:bg-green-500 hover:scale-105 transition-all"
+              className="bg-green-600/80 hover:bg-green-500 rounded-full p-2.5 shadow-xl hover:scale-110 transition-all opacity-70 group-hover:opacity-100"
               title="Add to Playlist"
             >
-              <Plus size={20} className="text-white" />
+              <Plus size={18} className="text-white" />
             </div>
           )}
           {/* Botón Play */}
@@ -149,10 +151,10 @@ export default function AlbumCard({
               e.stopPropagation();
               onPlayClick?.();
             }}
-            className="bg-blue-600 rounded-full p-3 shadow-xl hover:bg-blue-500 hover:scale-105 transition-all"
+            className="bg-blue-600/80 hover:bg-blue-500 rounded-full p-2.5 shadow-xl hover:scale-110 transition-all opacity-70 group-hover:opacity-100"
             title="Play preview"
           >
-            <Play fill="white" size={20} className="text-white" />
+            <Play fill="white" size={18} className="text-white" />
           </div>
         </div>
       </div>
