@@ -8,7 +8,7 @@
  * - Logo y nombre de la aplicación (MusicStream)
  * - Navegación principal: Home, Generate Playlist, Explore, Library, Liked Songs
  * - Botón para crear nuevas playlists (abre modal)
- * - Lista de playlists (actualmente hardcodeada)
+ * - Botón de Logout (limpia sesión y redirige al login)
  * - Resaltado visual de la ruta activa
  *
  * ARQUITECTURA:
@@ -24,7 +24,7 @@
  * - usePathname, useRouter: Hooks de navegación
  *
  * DEPENDENCIAS DE LUCIDE:
- * - Music, Home, Compass, Heart, PlusCircle, Library, Sparkles: Iconos del menú
+ * - Music, Home, Compass, Heart, PlusCircle, Library, Sparkles, LogOut: Iconos del menú
  *
  * REFERENCIAS:
  * - Importa useSpotify desde @/hooks/useSpotify (src/hooks/useSpotify.jsx)
@@ -41,9 +41,14 @@
  * 5. Si éxito: cierra modal y redirige a /dashboard/library
  * 6. Refresh de la página para mostrar la nueva playlist
  *
- * MEJORA FUTURA:
- * - La lista de playlists está hardcodeada. Debería cargar las playlists reales
- *   del usuario usando getUserPlaylists() de useSpotify.
+ * FLUJO DE LOGOUT:
+ * 1. Usuario hace clic en el botón "Logout"
+ * 2. handleLogout() limpia todos los tokens del localStorage:
+ *    - spotify_access_token
+ *    - spotify_refresh_token
+ *    - spotify_token_expiry
+ *    - favorite_tracks
+ * 3. Redirige al usuario a /login
  *
  * @returns {JSX.Element} - Barra lateral de navegación
  */
@@ -51,7 +56,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Music, Home, Compass, Heart, PlusCircle, Library, Sparkles } from 'lucide-react';
+import { Music, Home, Compass, Heart, PlusCircle, Library, Sparkles, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSpotify } from '@/hooks/useSpotify';
@@ -92,17 +97,16 @@ export default function Sidebar() {
     { icon: Heart, label: 'Liked Songs', href: '/dashboard/favorites' },
   ];
 
-  const playlists = [
-    'Chill Vibes',
-    'Late Night Coding',
-    'Workout Beats',
-    'Indie Discoveries',
-    'Focus Flow',
-    'Road Trip Anthems',
-    'Throwback Jams',
-    'Sunday Morning Coffee',
-    'Global Top 50'
-  ];
+  const handleLogout = () => {
+    // Limpiar todos los datos de autenticación del localStorage
+    localStorage.removeItem('spotify_access_token');
+    localStorage.removeItem('spotify_refresh_token');
+    localStorage.removeItem('spotify_token_expiry');
+    localStorage.removeItem('favorite_tracks');
+
+    // Redirigir al login
+    router.push('/login');
+  };
 
   return (
     <aside className="w-[260px] bg-[#121212] flex-shrink-0 flex flex-col hidden md:flex h-screen overflow-y-auto">
@@ -149,21 +153,16 @@ export default function Sidebar() {
         </button>
       </nav>
 
-      {/* Sección Playlists */}
-      <div className="px-6 mt-6 pb-6">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-          Playlists
-        </p>
-        <div className="space-y-1">
-          {playlists.map((playlist) => (
-            <a
-              key={playlist}
-              href="#"
-              className="block text-gray-400 hover:text-white py-1.5 text-sm transition-colors cursor-pointer"
-            >
-              {playlist}
-            </a>
-          ))}
+      {/* Logout Section */}
+      <div className="px-3 mt-auto pb-6">
+        <div className="border-t border-gray-800 pt-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-4 text-gray-400 hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl font-medium transition-all w-full group"
+          >
+            <LogOut size={22} className="group-hover:text-red-400 transition-colors" />
+            <span className="group-hover:text-red-400 transition-colors">Logout</span>
+          </button>
         </div>
       </div>
 
