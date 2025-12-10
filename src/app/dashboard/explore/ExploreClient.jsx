@@ -10,12 +10,33 @@ import FilterChips from '@/components/ui/FilterChips';
 import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useFavorites } from '@/hooks/useFavorites';
 
 /**
- * Cliente de Explore - Descubre nueva música
+ * PÁGINA: EXPLORE CLIENT - DESCUBRIMIENTO DE MÚSICA
+ * ==================================================
+ * Página de exploración que permite buscar y descubrir música nueva.
+ * Incluye búsqueda en tiempo real con filtros y recomendaciones personalizadas.
+ *
+ * FUNCIONALIDAD:
+ * - Barra de búsqueda con debounce (500ms)
+ * - Filtros por categoría: All, Tracks, Artists
+ * - Resultados de búsqueda en grid responsive
+ * - Recomendaciones personalizadas basadas en top tracks
+ * - Añadir canciones a playlists (modal)
+ * - Añadir/quitar canciones de "Liked Songs" (favoritos)
+ * - Reproducir previews de canciones
+ *
+ * DEPENDENCIAS:
+ * - useSpotify: Para búsquedas y obtener datos
+ * - useDebounce: Optimizar búsquedas en tiempo real
+ * - useFavorites: Gestión de canciones favoritas
+ *
+ * @returns {JSX.Element} Página de exploración de música
  */
 export default function ExploreClient() {
   const { getUserProfile, searchTracks, searchArtists, getUserTopTracks } = useSpotify();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -149,7 +170,10 @@ export default function ExploreClient() {
                         type={item.type || 'track'}
                         track={item}
                         showAddButton={item.type === 'track' || activeCategory === 'tracks'}
+                        showFavoriteButton={item.type === 'track' || activeCategory === 'tracks'}
+                        isFavorite={isFavorite(item.id)}
                         onAddToPlaylist={setSelectedTrackForPlaylist}
+                        onToggleFavorite={toggleFavorite}
                       />
                     ) : null
                   ))}
@@ -185,7 +209,10 @@ export default function ExploreClient() {
                         type="track"
                         track={track}
                         showAddButton={true}
+                        showFavoriteButton={true}
+                        isFavorite={isFavorite(track.id)}
                         onAddToPlaylist={setSelectedTrackForPlaylist}
+                        onToggleFavorite={toggleFavorite}
                       />
                     ) : null
                   ))}

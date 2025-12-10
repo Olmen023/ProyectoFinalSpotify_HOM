@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Plus } from 'lucide-react';
+import { Play, Plus, Heart } from 'lucide-react';
 
 /**
  * COMPONENTE: AlbumCard - Tarjeta visual de álbum/artista/track
@@ -49,7 +49,10 @@ import { Play, Plus } from 'lucide-react';
  * @param {Function} props.onClick - Callback al hacer clic en la card
  * @param {Function} props.onPlayClick - Callback al hacer clic en botón Play
  * @param {Function} props.onAddToPlaylist - Callback al añadir a playlist
+ * @param {Function} props.onToggleFavorite - Callback al toggle favorito
  * @param {boolean} props.showAddButton - Si muestra botón de añadir (default: false)
+ * @param {boolean} props.showFavoriteButton - Si muestra botón de favoritos (default: false)
+ * @param {boolean} props.isFavorite - Si el track está en favoritos
  * @param {Object} props.track - Objeto track completo (para pasar a onAddToPlaylist)
  *
  * @returns {JSX.Element} Card de álbum/artista con hover effects
@@ -62,6 +65,7 @@ import { Play, Plus } from 'lucide-react';
  * 3. Al hacer hover: muestra botones con animación (opacity y translate)
  * 4. Botón Play: ejecuta onPlayClick con stopPropagation
  * 5. Botón Add: ejecuta onAddToPlaylist(track) con stopPropagation
+ * 6. Botón Heart: ejecuta onToggleFavorite(track) con stopPropagation
  */
 export default function AlbumCard({
   id,
@@ -75,7 +79,10 @@ export default function AlbumCard({
   onClick,
   onPlayClick,
   onAddToPlaylist,
+  onToggleFavorite,
   showAddButton = false,
+  showFavoriteButton = false,
+  isFavorite = false,
   track // Para poder añadir a playlist
 }) {
   // Usar nuevas props con fallback a props antiguas
@@ -105,6 +112,24 @@ export default function AlbumCard({
         />
         {/* Botones (aparecen en hover) */}
         <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all">
+          {/* Botón Favorite (Heart) */}
+          {showFavoriteButton && onToggleFavorite && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(track);
+              }}
+              className={`${
+                isFavorite ? 'bg-red-600 hover:bg-red-500' : 'bg-gray-600 hover:bg-gray-500'
+              } rounded-full p-3 shadow-xl hover:scale-105 transition-all`}
+              title={isFavorite ? 'Remove from Liked Songs' : 'Add to Liked Songs'}
+            >
+              <Heart
+                size={20}
+                className={`text-white ${isFavorite ? 'fill-white' : ''}`}
+              />
+            </div>
+          )}
           {/* Botón Add to Playlist */}
           {showAddButton && onAddToPlaylist && (
             <div
@@ -113,6 +138,7 @@ export default function AlbumCard({
                 onAddToPlaylist(track);
               }}
               className="bg-green-600 rounded-full p-3 shadow-xl hover:bg-green-500 hover:scale-105 transition-all"
+              title="Add to Playlist"
             >
               <Plus size={20} className="text-white" />
             </div>
@@ -124,6 +150,7 @@ export default function AlbumCard({
               onPlayClick?.();
             }}
             className="bg-blue-600 rounded-full p-3 shadow-xl hover:bg-blue-500 hover:scale-105 transition-all"
+            title="Play preview"
           >
             <Play fill="white" size={20} className="text-white" />
           </div>
